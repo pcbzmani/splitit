@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SplitIt — Group Expense Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161a24;
+    --surface2: #1e2433;
+    --border: #2a3045;
+    --accent: #6ee7b7;
+    --accent2: #38bdf8;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --text: #e8eaf0;
+    --muted: #6b7490;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BACKGROUND GLOW */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(110,231,183,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -200px; right: -200px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(56,189,248,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+  .sheet-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .sheet-badge:hover { border-color: var(--accent); color: var(--accent); }
+  .sheet-badge .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* SUMMARY CARDS */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .card-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .card-value.green { color: var(--accent); }
+  .card-value.red { color: var(--danger); }
+  .card-value.blue { color: var(--accent2); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 24px;
+    width: fit-content;
+  }
+  .tab {
+    padding: 8px 20px;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: #0d0f14;
+    font-weight: 600;
+  }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ADD EXPENSE FORM */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .form-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media(max-width:560px){ .form-grid { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  input, select, textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+
+  /* SPLIT SECTION */
+  .split-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+  .split-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .split-btn.active { background: var(--surface2); border-color: var(--accent2); color: var(--accent2); }
+
+  .members-split { display: flex; flex-direction: column; gap: 8px; }
+  .member-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  .member-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .member-name { flex: 1; font-size: 0.88rem; }
+  .member-split-input {
+    width: 80px;
+    text-align: right;
+    padding: 6px 10px;
+  }
+  .member-amount { font-size: 0.8rem; color: var(--muted); width: 70px; text-align: right; }
+
+  /* CHECKBOX */
+  .checkbox-wrap { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .checkbox-wrap input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+  }
+  .btn-primary { background: var(--accent); color: #0d0f14; }
+  .btn-primary:hover { background: #4ade80; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--border); }
+  .btn-danger:hover { border-color: var(--danger); }
+  .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+  /* EXPENSE LIST */
+  .expense-list { display: flex; flex-direction: column; gap: 10px; }
+  .expense-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .expense-item:hover { border-color: var(--border); background: var(--surface2); }
+  .expense-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .expense-info { flex: 1; min-width: 0; }
+  .expense-desc { font-weight: 500; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .expense-meta { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+  .expense-amount {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .expense-paid-by { font-size: 0.75rem; color: var(--muted); text-align: right; margin-top: 2px; }
+  .expense-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 32px; height: 32px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { border-color: var(--danger); color: var(--danger); }
+  .icon-btn.edit:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* BALANCES */
+  .balances-grid { display: flex; flex-direction: column; gap: 10px; }
+  .balance-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .balance-info { flex: 1; }
+  .balance-name { font-weight: 500; }
+  .balance-detail { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+  .balance-amount { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.2rem; }
+  .balance-amount.owed { color: var(--accent); }
+  .balance-amount.owes { color: var(--danger); }
+  .balance-amount.settled { color: var(--muted); }
+
+  /* SETTLEMENTS */
+  .settlement-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .settlement-arrow { color: var(--accent); font-size: 1.2rem; }
+  .settle-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .settle-btn:hover { background: var(--accent); color: #0d0f14; }
+
+  /* MEMBERS PANEL */
+  .members-manage { display: flex; flex-direction: column; gap: 10px; }
+  .member-manage-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .add-member-form { display: flex; gap: 8px; }
+  .add-member-form input { flex: 1; }
+
+  /* GOOGLE SHEET MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 480px;
+    width: 90%;
+    transform: translateY(20px);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+  .modal-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: var(--accent2);
+    overflow-x: auto;
+    margin-bottom: 16px;
+    white-space: pre;
+  }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-title { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 0.88rem;
+    color: var(--accent);
+    transform: translateY(60px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* CATEGORY COLORS */
+  .cat-food { background: rgba(251,191,36,0.15); }
+  .cat-transport { background: rgba(56,189,248,0.15); }
+  .cat-accommodation { background: rgba(167,139,250,0.15); }
+  .cat-entertainment { background: rgba(249,115,22,0.15); }
+  .cat-other { background: rgba(110,231,183,0.1); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+  .count-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-chip {
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 0.78rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-chip.active { background: var(--surface2); border-color: var(--accent2); color: var(--accent2); }
+
+  /* SYNC STATUS */
+  .sync-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .sync-icon { font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">Split<span>It</span></div>
+    <div class="sheet-badge" onclick="openSheetModal()">
+      <div class="dot"></div>
+      <span id="sheetStatus">Connect Google Sheet</span>
+    </div>
+  </header>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-grid" id="summaryCards">
+    <div class="card">
+      <div class="card-label">Total Expenses</div>
+      <div class="card-value blue" id="totalExpenses">QAR 0</div>
+    </div>
+    <div class="card">
+      <div class="card-label">You Are Owed</div>
+      <div class="card-value green" id="youAreOwed">QAR 0</div>
+    </div>
+    <div class="card">
+      <div class="card-label">You Owe</div>
+      <div class="card-value red" id="youOwe">QAR 0</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Expenses</div>
+      <div class="card-value" id="expenseCount">0</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('expenses')">💸 Expenses</button>
+    <button class="tab" onclick="switchTab('balances')">⚖️ Balances</button>
+    <button class="tab" onclick="switchTab('members')">👥 Members</button>
+  </div>
+
+  <!-- ===== EXPENSES TAB ===== -->
+  <div class="section active" id="tab-expenses">
+
+    <!-- ADD EXPENSE FORM -->
+    <div class="form-card">
+      <div class="form-title">+ Add New Expense</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Description</label>
+          <input type="text" id="expDesc" placeholder="e.g. Dinner at IDAM, Taxi to airport…">
+        </div>
+        <div class="form-group">
+          <label>Amount (QAR)</label>
+          <input type="number" id="expAmount" placeholder="0.00" min="0" step="0.01" oninput="updateSplitAmounts()">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="expCategory">
+            <option value="🍽️ Food">🍽️ Food</option>
+            <option value="🚗 Transport">🚗 Transport</option>
+            <option value="🏨 Accommodation">🏨 Accommodation</option>
+            <option value="🎮 Entertainment">🎮 Entertainment</option>
+            <option value="🛒 Other">🛒 Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Paid By</label>
+          <select id="expPaidBy" onchange="updateSplitAmounts()"></select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="expDate">
+        </div>
+        <div class="form-group full">
+          <label>Split</label>
+          <div class="split-toggle">
+            <button class="split-btn active" onclick="setSplitMode('equal', this)">Equal</button>
+            <button class="split-btn" onclick="setSplitMode('percent', this)">Custom %</button>
+            <button class="split-btn" onclick="setSplitMode('amount', this)">Custom Amount</button>
+          </div>
+          <div class="members-split" id="membersSplit"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+        <button class="btn btn-primary" onclick="addExpense()">Add Expense</button>
+      </div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-row" id="categoryFilters">
+      <button class="filter-chip active" onclick="filterCategory('all', this)">All</button>
+      <button class="filter-chip" onclick="filterCategory('🍽️ Food', this)">🍽️ Food</button>
+      <button class="filter-chip" onclick="filterCategory('🚗 Transport', this)">🚗 Transport</button>
+      <button class="filter-chip" onclick="filterCategory('🏨 Accommodation', this)">🏨 Accommodation</button>
+      <button class="filter-chip" onclick="filterCategory('🎮 Entertainment', this)">🎮 Entertainment</button>
+      <button class="filter-chip" onclick="filterCategory('🛒 Other', this)">🛒 Other</button>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Recent Expenses</div>
+      <div class="count-badge" id="expCountBadge">0 items</div>
+    </div>
+
+    <div class="expense-list" id="expenseList">
+      <div class="empty">
+        <div class="empty-icon">💸</div>
+        <div class="empty-title">No expenses yet</div>
+        <div>Add your first shared expense above</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BALANCES TAB ===== -->
+  <div class="section" id="tab-balances">
+    <div class="section-header">
+      <div class="section-title">Who Owes What</div>
+    </div>
+    <div class="balances-grid" id="balancesList"></div>
+
+    <div class="section-header" style="margin-top:28px">
+      <div class="section-title">Suggested Settlements</div>
+    </div>
+    <div id="settlementsList"></div>
+  </div>
+
+  <!-- ===== MEMBERS TAB ===== -->
+  <div class="section" id="tab-members">
+    <div class="form-card">
+      <div class="form-title">👥 Group Members</div>
+      <div class="add-member-form" style="margin-bottom:16px">
+        <input type="text" id="newMemberName" placeholder="Member name…" onkeydown="if(event.key==='Enter')addMember()">
+        <button class="btn btn-primary" onclick="addMember()">Add</button>
+      </div>
+      <div class="members-manage" id="membersList"></div>
+    </div>
+
+    <div class="form-card" style="margin-top:16px">
+      <div class="form-title">🔗 Google Sheets Sync</div>
+      <p style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:16px">
+        To sync with Google Sheets, deploy the Apps Script below as a Web App.
+        Paste your Web App URL to enable live sync — your friends can also edit the sheet directly.
+      </p>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="sheetUrl" placeholder="Paste your Apps Script Web App URL…" style="flex:1">
+        <button class="btn btn-primary" onclick="saveSheetUrl()">Connect</button>
+      </div>
+      <button class="btn btn-ghost" style="margin-top:10px;width:100%" onclick="openSheetModal()">📄 View Setup Instructions</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- GOOGLE SHEET MODAL -->
+<div class="modal-overlay" id="sheetModal">
+  <div class="modal">
+    <div class="modal-title">📊 Connect Google Sheets</div>
+    <div class="modal-desc">
+      Follow these steps to sync expenses with Google Sheets so your friends can edit directly:
+      <br><br>
+      <b>1.</b> Open Google Sheets → Extensions → Apps Script<br>
+      <b>2.</b> Paste the code below, click Save, then Deploy → New Deployment → Web App → Anyone<br>
+      <b>3.</b> Copy the Web App URL and paste it in the Members tab
+    </div>
+    <div class="code-block" id="appsScriptCode"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeSheetModal()">Close</button>
+      <button class="btn btn-primary" onclick="copyScript()">📋 Copy Script</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  members: ['You', 'Ahmed', 'Sara', 'Khalid'],
+  expenses: [],
+  splitMode: 'equal',
+  sheetUrl: '',
+  currentUser: 'You',
+  filterCategory: 'all',
+  editingId: null
+};
+
+// Load from localStorage
+try {
+  const saved = localStorage.getItem('splitit');
+  if (saved) { const s = JSON.parse(saved); Object.assign(state, s); }
+} catch(e){}
+
+// ============================================================
+// SAVE
+// ============================================================
+function save() {
+  localStorage.setItem('splitit', JSON.stringify(state));
+  updateSummary();
+  if (state.sheetUrl) syncToSheet();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  const dateInput = document.getElementById('expDate');
+  dateInput.value = new Date().toISOString().split('T')[0];
+  renderPaidBySelect();
+  renderMembersSplit();
+  renderMembers();
+  renderExpenses();
+  renderBalances();
+  updateSummary();
+  document.getElementById('sheetUrl').value = state.sheetUrl || '';
+  if (state.sheetUrl) document.getElementById('sheetStatus').textContent = 'Synced with Sheet';
+  document.getElementById('appsScriptCode').textContent = getAppsScript();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'balances') renderBalances();
+  if (tab === 'members') renderMembers();
+}
+
+// ============================================================
+// MEMBERS
+// ============================================================
+function renderPaidBySelect() {
+  const sel = document.getElementById('expPaidBy');
+  const current = sel.value;
+  sel.innerHTML = state.members.map(m => `<option value="${m}" ${m===current?'selected':''}>${m}</option>`).join('');
+}
+
+function addMember() {
+  const input = document.getElementById('newMemberName');
+  const name = input.value.trim();
+  if (!name || state.members.includes(name)) { toast('Enter a unique name'); return; }
+  state.members.push(name);
+  input.value = '';
+  renderMembers();
+  renderPaidBySelect();
+  renderMembersSplit();
+  save();
+  toast(`${name} added to the group`);
+}
+
+function removeMember(name) {
+  if (state.members.length <= 2) { toast("Need at least 2 members"); return; }
+  if (name === state.currentUser) { toast("Can't remove yourself"); return; }
+  state.members = state.members.filter(m => m !== name);
+  renderMembers();
+  renderPaidBySelect();
+  renderMembersSplit();
+  save();
+}
+
+function renderMembers() {
+  const colors = ['#6ee7b7','#38bdf8','#f472b6','#fbbf24','#a78bfa','#fb923c'];
+  const list = document.getElementById('membersList');
+  list.innerHTML = state.members.map((m, i) => `
+    <div class="member-manage-row">
+      <div class="member-avatar" style="background:${colors[i%colors.length]}22;color:${colors[i%colors.length]}">${m[0].toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-size:0.9rem;font-weight:500">${m}</div>
+        <div style="font-size:0.75rem;color:var(--muted)">${m===state.currentUser?'You':'Member'}</div>
+      </div>
+      ${m!==state.currentUser?`<button class="icon-btn" onclick="removeMember('${m}')" title="Remove">✕</button>`:''}
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// SPLIT MODE
+// ============================================================
+function setSplitMode(mode, btn) {
+  state.splitMode = mode;
+  document.querySelectorAll('.split-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMembersSplit();
+  updateSplitAmounts();
+}
+
+function renderMembersSplit() {
+  const colors = ['#6ee7b7','#38bdf8','#f472b6','#fbbf24','#a78bfa','#fb923c'];
+  const container = document.getElementById('membersSplit');
+  const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+  const n = state.members.length;
+
+  container.innerHTML = state.members.map((m, i) => {
+    const equalAmt = n > 0 ? (amount / n).toFixed(2) : '0.00';
+    const equalPct = n > 0 ? (100/n).toFixed(1) : '0';
+
+    if (state.splitMode === 'equal') {
+      return `
+        <div class="member-row">
+          <div class="member-avatar" style="background:${colors[i%colors.length]}22;color:${colors[i%colors.length]}">${m[0]}</div>
+          <div class="member-name">${m}</div>
+          <label class="checkbox-wrap"><input type="checkbox" class="split-check" value="${m}" checked onchange="updateSplitAmounts()"></label>
+          <div class="member-amount split-display" id="split-${i}">QAR ${equalAmt}</div>
+        </div>`;
+    } else if (state.splitMode === 'percent') {
+      return `
+        <div class="member-row">
+          <div class="member-avatar" style="background:${colors[i%colors.length]}22;color:${colors[i%colors.length]}">${m[0]}</div>
+          <div class="member-name">${m}</div>
+          <input type="number" class="member-split-input split-pct" value="${equalPct}" min="0" max="100" step="0.1" oninput="updateSplitAmounts()">
+          <div class="member-amount" style="color:var(--muted)">%</div>
+          <div class="member-amount split-display" id="split-${i}">QAR ${equalAmt}</div>
+        </div>`;
+    } else {
+      return `
+        <div class="member-row">
+          <div class="member-avatar" style="background:${colors[i%colors.length]}22;color:${colors[i%colors.length]}">${m[0]}</div>
+          <div class="member-name">${m}</div>
+          <input type="number" class="member-split-input split-amt" value="${equalAmt}" min="0" step="0.01" oninput="updateSplitAmounts()">
+        </div>`;
+    }
+  }).join('');
+}
+
+function updateSplitAmounts() {
+  const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+  const n = state.members.length;
+
+  if (state.splitMode === 'equal') {
+    const checks = document.querySelectorAll('.split-check:checked');
+    const perPerson = checks.length > 0 ? amount / checks.length : 0;
+    document.querySelectorAll('.split-check').forEach((cb, i) => {
+      const disp = document.getElementById('split-' + i);
+      if (disp) disp.textContent = cb.checked ? `QAR ${perPerson.toFixed(2)}` : 'QAR 0.00';
+    });
+  } else if (state.splitMode === 'percent') {
+    document.querySelectorAll('.split-pct').forEach((inp, i) => {
+      const pct = parseFloat(inp.value) || 0;
+      const disp = document.getElementById('split-' + i);
+      if (disp) disp.textContent = `QAR ${(amount * pct / 100).toFixed(2)}`;
+    });
+  }
+}
+
+// ============================================================
+// EXPENSES
+// ============================================================
+function getSplitData() {
+  const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+  const splits = {};
+
+  if (state.splitMode === 'equal') {
+    const checks = [...document.querySelectorAll('.split-check')];
+    const checked = checks.filter(c => c.checked);
+    const per = checked.length > 0 ? amount / checked.length : 0;
+    checks.forEach(c => { splits[c.value] = c.checked ? per : 0; });
+  } else if (state.splitMode === 'percent') {
+    document.querySelectorAll('.split-pct').forEach((inp, i) => {
+      splits[state.members[i]] = amount * (parseFloat(inp.value)||0) / 100;
+    });
+  } else {
+    document.querySelectorAll('.split-amt').forEach((inp, i) => {
+      splits[state.members[i]] = parseFloat(inp.value) || 0;
+    });
+  }
+  return splits;
+}
+
+function addExpense() {
+  const desc = document.getElementById('expDesc').value.trim();
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  const category = document.getElementById('expCategory').value;
+  const paidBy = document.getElementById('expPaidBy').value;
+  const date = document.getElementById('expDate').value;
+
+  if (!desc) { toast('Please enter a description'); return; }
+  if (!amount || amount <= 0) { toast('Please enter a valid amount'); return; }
+
+  const splits = getSplitData();
+
+  const expense = {
+    id: Date.now(),
+    desc, amount, category, paidBy, date,
+    splits,
+    splitMode: state.splitMode
+  };
+
+  state.expenses.unshift(expense);
+  save();
+  renderExpenses();
+  clearForm();
+  toast(`"${desc}" added — QAR ${amount.toFixed(2)}`);
+}
+
+function deleteExpense(id) {
+  state.expenses = state.expenses.filter(e => e.id !== id);
+  save();
+  renderExpenses();
+  renderBalances();
+  toast('Expense removed');
+}
+
+function clearForm() {
+  document.getElementById('expDesc').value = '';
+  document.getElementById('expAmount').value = '';
+  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+  renderMembersSplit();
+}
+
+let activeFilter = 'all';
+function filterCategory(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderExpenses();
+}
+
+function renderExpenses() {
+  const list = document.getElementById('expenseList');
+  let expenses = state.expenses;
+  if (activeFilter !== 'all') expenses = expenses.filter(e => e.category === activeFilter);
+
+  document.getElementById('expCountBadge').textContent = `${expenses.length} item${expenses.length!==1?'s':''}`;
+
+  if (expenses.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">💸</div><div class="empty-title">No expenses</div><div>${activeFilter!=='all'?'No expenses in this category':'Add your first shared expense above'}</div></div>`;
+    return;
+  }
+
+  list.innerHTML = expenses.map(e => {
+    const emoji = e.category.split(' ')[0];
+    const catClass = getCatClass(e.category);
+    const splitPreview = Object.entries(e.splits).filter(([_,v])=>v>0).map(([k,v])=>`${k}: QAR${v.toFixed(0)}`).join(' · ');
+    return `
+      <div class="expense-item">
+        <div class="expense-icon ${catClass}">${emoji}</div>
+        <div class="expense-info">
+          <div class="expense-desc">${e.desc}</div>
+          <div class="expense-meta">${e.date} · ${e.category.replace(/[^ ]+ /,'')} · ${splitPreview}</div>
+        </div>
+        <div>
+          <div class="expense-amount">QAR ${e.amount.toFixed(2)}</div>
+          <div class="expense-paid-by">Paid by ${e.paidBy}</div>
+        </div>
+        <div class="expense-actions">
+          <button class="icon-btn" onclick="deleteExpense(${e.id})" title="Delete">🗑</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function getCatClass(cat) {
+  if (cat.includes('Food')) return 'cat-food';
+  if (cat.includes('Transport')) return 'cat-transport';
+  if (cat.includes('Accommodation')) return 'cat-accommodation';
+  if (cat.includes('Entertainment')) return 'cat-entertainment';
+  return 'cat-other';
+}
+
+// ============================================================
+// BALANCES
+// ============================================================
+function computeBalances() {
+  const balances = {};
+  state.members.forEach(m => balances[m] = 0);
+
+  state.expenses.forEach(exp => {
+    balances[exp.paidBy] += exp.amount;
+    Object.entries(exp.splits).forEach(([member, share]) => {
+      balances[member] -= share;
+    });
+  });
+  return balances;
+}
+
+function computeSettlements(balances) {
+  const creditors = [], debtors = [];
+  Object.entries(balances).forEach(([m, b]) => {
+    if (b > 0.01) creditors.push({name: m, amount: b});
+    if (b < -0.01) debtors.push({name: m, amount: -b});
+  });
+
+  const settlements = [];
+  let ci = 0, di = 0;
+  while (ci < creditors.length && di < debtors.length) {
+    const credit = creditors[ci];
+    const debt = debtors[di];
+    const amount = Math.min(credit.amount, debt.amount);
+    settlements.push({ from: debt.name, to: credit.name, amount });
+    credit.amount -= amount;
+    debt.amount -= amount;
+    if (credit.amount < 0.01) ci++;
+    if (debt.amount < 0.01) di++;
+  }
+  return settlements;
+}
+
+function renderBalances() {
+  const balances = computeBalances();
+  const colors = ['#6ee7b7','#38bdf8','#f472b6','#fbbf24','#a78bfa','#fb923c'];
+  const list = document.getElementById('balancesList');
+
+  if (state.expenses.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">⚖️</div><div class="empty-title">No balances yet</div><div>Add expenses to see who owes what</div></div>`;
+    document.getElementById('settlementsList').innerHTML = '';
+    return;
+  }
+
+  list.innerHTML = state.members.map((m, i) => {
+    const b = balances[m] || 0;
+    const cls = b > 0.01 ? 'owed' : b < -0.01 ? 'owes' : 'settled';
+    const label = b > 0.01 ? `is owed QAR ${b.toFixed(2)}` : b < -0.01 ? `owes QAR ${(-b).toFixed(2)}` : 'is settled up';
+    return `
+      <div class="balance-item">
+        <div class="member-avatar" style="background:${colors[i%colors.length]}22;color:${colors[i%colors.length]};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600">${m[0].toUpperCase()}</div>
+        <div class="balance-info">
+          <div class="balance-name">${m}</div>
+          <div class="balance-detail">${label}</div>
+        </div>
+        <div class="balance-amount ${cls}">
+          ${b > 0.01 ? '+' : ''}QAR ${Math.abs(b).toFixed(2)}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Settlements
+  const settlements = computeSettlements(balances);
+  const sEl = document.getElementById('settlementsList');
+  if (settlements.length === 0) {
+    sEl.innerHTML = `<div style="color:var(--accent);font-size:0.88rem;padding:16px 0">✅ All settled up!</div>`;
+  } else {
+    sEl.innerHTML = settlements.map(s => `
+      <div class="settlement-item">
+        <div class="member-avatar" style="background:rgba(248,113,113,0.15);color:#f87171;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.8rem">${s.from[0]}</div>
+        <div style="font-size:0.9rem"><b>${s.from}</b> pays <b>QAR ${s.amount.toFixed(2)}</b></div>
+        <div class="settlement-arrow">→</div>
+        <div class="member-avatar" style="background:rgba(110,231,183,0.15);color:#6ee7b7;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.8rem">${s.to[0]}</div>
+        <div style="font-size:0.9rem"><b>${s.to}</b></div>
+        <button class="settle-btn" onclick="markSettled('${s.from}','${s.to}',${s.amount})">Mark Settled</button>
+      </div>`).join('');
+  }
+}
+
+function markSettled(from, to, amount) {
+  state.expenses.unshift({
+    id: Date.now(),
+    desc: `💰 Settlement: ${from} → ${to}`,
+    amount: amount,
+    category: '🛒 Other',
+    paidBy: from,
+    date: new Date().toISOString().split('T')[0],
+    splits: {[to]: amount},
+    splitMode: 'amount'
+  });
+  // adjust the splits so only 'to' shares, and 'from' is the payer
+  const exp = state.expenses[0];
+  state.members.filter(m=>m!==to).forEach(m=>{ if(!exp.splits[m]) exp.splits[m]=0; });
+  save();
+  renderExpenses();
+  renderBalances();
+  toast(`Settlement recorded ✓`);
+}
+
+// ============================================================
+// SUMMARY
+// ============================================================
+function updateSummary() {
+  const total = state.expenses.reduce((s, e) => s + e.amount, 0);
+  const balances = computeBalances();
+  const myBalance = balances[state.currentUser] || 0;
+
+  document.getElementById('totalExpenses').textContent = `QAR ${total.toFixed(2)}`;
+  document.getElementById('youAreOwed').textContent = myBalance > 0 ? `QAR ${myBalance.toFixed(2)}` : 'QAR 0.00';
+  document.getElementById('youOwe').textContent = myBalance < 0 ? `QAR ${(-myBalance).toFixed(2)}` : 'QAR 0.00';
+  document.getElementById('expenseCount').textContent = state.expenses.length;
+}
+
+// ============================================================
+// GOOGLE SHEET SYNC
+// ============================================================
+async function syncToSheet() {
+  if (!state.sheetUrl) return;
+  try {
+    await fetch(state.sheetUrl, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'sync', expenses: state.expenses, members: state.members }),
+      headers: {'Content-Type': 'application/json'}
+    });
+  } catch(e) { console.log('Sheet sync error', e); }
+}
+
+function saveSheetUrl() {
+  const url = document.getElementById('sheetUrl').value.trim();
+  state.sheetUrl = url;
+  save();
+  document.getElementById('sheetStatus').textContent = url ? 'Synced with Sheet' : 'Connect Google Sheet';
+  toast(url ? '✅ Google Sheet connected!' : 'Sheet URL cleared');
+}
+
+// ============================================================
+// APPS SCRIPT CODE
+// ============================================================
+function getAppsScript() {
+  return `function doPost(e) {
+  const data = JSON.parse(e.postData.contents);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // EXPENSES sheet
+  let sh = ss.getSheetByName("Expenses");
+  if (!sh) sh = ss.insertSheet("Expenses");
+  sh.clearContents();
+  sh.appendRow(["ID","Date","Description","Category","Amount","Paid By","Splits"]);
+  
+  data.expenses.forEach(exp => {
+    const splits = Object.entries(exp.splits)
+      .map(([k,v]) => k+":"+v.toFixed(2)).join(", ");
+    sh.appendRow([exp.id, exp.date, exp.desc, exp.category,
+      exp.amount, exp.paidBy, splits]);
+  });
+  
+  // MEMBERS sheet
+  let msh = ss.getSheetByName("Members");
+  if (!msh) msh = ss.insertSheet("Members");
+  msh.clearContents();
+  msh.appendRow(["Member"]);
+  data.members.forEach(m => msh.appendRow([m]));
+  
+  return ContentService.createTextOutput(
+    JSON.stringify({status:"ok"})
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName("Expenses");
+  if (!sh) return ContentService.createTextOutput("[]");
+  const rows = sh.getDataRange().getValues();
+  return ContentService.createTextOutput(
+    JSON.stringify(rows)
+  ).setMimeType(ContentService.MimeType.JSON);
+}`;
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openSheetModal() { document.getElementById('sheetModal').classList.add('open'); }
+function closeSheetModal() { document.getElementById('sheetModal').classList.remove('open'); }
+document.getElementById('sheetModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSheetModal();
+});
+function copyScript() {
+  navigator.clipboard.writeText(getAppsScript()).then(() => toast('Script copied to clipboard!'));
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ============================================================
+// START
+// ============================================================
+init();
+</script>
+</body>
+</html>
