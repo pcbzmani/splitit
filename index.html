@@ -417,6 +417,13 @@ select option{background:var(--surface2);}
       <span style="color:var(--warn);font-size:0.78rem">⚠️ Always use New Deployment (not Manage) each time.</span>
     </div>
     <div class="code-block" id="appsScriptCode"></div>
+    <div style="margin-top:14px">
+      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px">Paste your Web App URL</div>
+      <div style="display:flex;gap:7px">
+        <input type="text" id="sheetUrlModal" placeholder="https://script.google.com/macros/s/…" style="flex:1" oninput="document.getElementById('saveSheetBtn').style.opacity=this.value.trim()?'1':'0.4'">
+        <button id="saveSheetBtn" class="btn btn-primary" style="opacity:0.4;transition:opacity 0.2s" onclick="saveSheetUrlFromModal()">Save</button>
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('sheetModal')">Close</button>
       <button class="btn btn-primary" onclick="copyScript()">📋 Copy Script</button>
@@ -996,10 +1003,16 @@ function doGet(e) {
 function writeToSheet(data) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const cur = data.currency || "QAR";
+  const grp = (data.groupName || "Default").replace(/[:\\/?*[\]]/g, "").substring(0, 25);
 
-  // Expenses sheet
-  let sh = ss.getSheetByName("Expenses");
-  if (!sh) sh = ss.insertSheet("Expenses");
+  function getOrCreate(name) {
+    let sh = ss.getSheetByName(name);
+    if (!sh) sh = ss.insertSheet(name);
+    return sh;
+  }
+
+  // Expenses tab — one per group
+  let sh = getOrCreate(grp + " — Expenses");
   sh.clearContents();
   sh.appendRow(["ID","Date","Description","Category","Amount","Currency","Paid By","Split Details"]);
   sh.getRange(1,1,1,8).setBackground("#0f3d2a").setFontColor("#6ee7b7").setFontWeight("bold");
@@ -1012,17 +1025,15 @@ function writeToSheet(data) {
   });
   sh.autoResizeColumns(1,8);
 
-  // Members sheet
-  let msh = ss.getSheetByName("Members");
-  if (!msh) msh = ss.insertSheet("Members");
+  // Members tab — one per group
+  let msh = getOrCreate(grp + " — Members");
   msh.clearContents();
   msh.appendRow(["Member"]);
   msh.getRange(1,1).setBackground("#0f3d2a").setFontColor("#6ee7b7").setFontWeight("bold");
   (data.members||[]).forEach(m => msh.appendRow([m]));
 
-  // Balances sheet
-  let bsh = ss.getSheetByName("Balances");
-  if (!bsh) bsh = ss.insertSheet("Balances");
+  // Balances tab — one per group
+  let bsh = getOrCreate(grp + " — Balances");
   bsh.clearContents();
   bsh.appendRow(["Member","Balance","Currency","Status"]);
   bsh.getRange(1,1,1,4).setBackground("#0f3d2a").setFontColor("#6ee7b7").setFontWeight("bold");
@@ -1052,7 +1063,25 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});
 });
-function openSheetModal(){document.getElementById('appsScriptCode').textContent=getAppsScript();openModal('sheetModal');}
+function openSheetModal(){
+  document.getElementById('appsScriptCode').textContent=getAppsScript();
+  const g=G();
+  const inp=document.getElementById('sheetUrlModal');
+  inp.value=g?g.sheetUrl||'':'';
+  document.getElementById('saveSheetBtn').style.opacity=inp.value.trim()?'1':'0.4';
+  openModal('sheetModal');
+}
+function saveSheetUrlFromModal(){
+  const url=document.getElementById('sheetUrlModal').value.trim();
+  if(url&&!url.includes('script.google.com')){toast('Paste an Apps Script Web App URL');return;}
+  const g=G();if(!g)return;
+  g.sheetUrl=url;persist();
+  document.getElementById('sheetUrl').value=url;
+  document.getElementById('sheetStatus').textContent=url?'Sheet Connected':'Google Sheet';
+  toast(url?'Sheet connected! Syncing…':'URL cleared');
+  closeModal('sheetModal');
+  if(url)syncToSheet();
+}
 function copyScript(){navigator.clipboard.writeText(getAppsScript()).then(()=>toast('Script copied!'));}
 
 // ══════════════════════════════════════
