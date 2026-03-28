@@ -42,8 +42,12 @@ function writeToSheet(data) {
   if (!meta) { meta = ss.insertSheet('_meta'); meta.hideSheet(); }
   let existing = {groups: []};
   try { existing = JSON.parse(meta.getRange(1,1).getValue()) || {groups: []}; } catch(e) {}
-  const idx = existing.groups.findIndex(g => g.name === data.groupName);
+  // Match by id (preferred) or fall back to name for backwards compat
+  const idx = data.groupId
+    ? existing.groups.findIndex(g => g.id === data.groupId)
+    : existing.groups.findIndex(g => g.name === data.groupName);
   const gd = {
+    id: data.groupId || data.groupName,
     name: data.groupName,
     emoji: data.groupEmoji || '👥',
     currency: cur,

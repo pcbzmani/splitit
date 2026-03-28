@@ -229,6 +229,7 @@ select option{background:var(--surface2);}
       </div>
       <div style="display:flex;gap:7px;align-items:center">
         <button id="shareSheetBtn" class="btn btn-ghost" style="font-size:0.78rem;display:none" onclick="shareSheet()">⎘ Share</button>
+        <button id="pullSheetBtn" class="btn btn-ghost" style="font-size:0.78rem;display:none" onclick="pullFromSheet(GS(),false)" title="Pull latest groups from shared sheet">↻ Pull</button>
         <button class="btn btn-ghost" style="font-size:0.78rem" onclick="openSheetSettings()">⚙️</button>
       </div>
     </div>
@@ -275,7 +276,7 @@ select option{background:var(--surface2);}
   <!-- EXPENSES -->
   <div class="section active" id="tab-expenses">
     <div class="form-card">
-      <div class="form-title">+ Add Expense</div>
+      <div class="form-title" id="expFormTitle">+ Add Expense</div>
       <div class="form-grid">
         <div class="form-group full">
           <label>Description</label>
@@ -322,7 +323,7 @@ select option{background:var(--surface2);}
       </div>
       <div class="form-actions">
         <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
-        <button class="btn btn-primary" onclick="addExpense()">Add Expense</button>
+        <button class="btn btn-primary" id="expSubmitBtn" onclick="addExpense()">Add Expense</button>
       </div>
     </div>
 
@@ -482,6 +483,18 @@ select option{background:var(--surface2);}
     <div class="modal-title">💱 Select Expense Currency</div>
     <input type="text" id="currencySearch" placeholder="Search…" style="margin-bottom:10px" oninput="renderCurrencyGrid(getActiveExpCurrency(),this.value)">
     <div class="currency-grid" id="currencyGrid"></div>
+    <div id="customCurForm" style="display:none;margin-top:12px;padding:12px;background:var(--surface2);border-radius:10px;display:none">
+      <div style="font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Add Custom Currency</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+        <div><label style="font-size:.75rem;color:var(--muted)">Code (e.g. XYZ)</label><input id="custCode" maxlength="6" placeholder="XYZ" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+        <div><label style="font-size:.75rem;color:var(--muted)">Symbol</label><input id="custSym" maxlength="5" placeholder="$"></div>
+        <div><label style="font-size:.75rem;color:var(--muted)">Name</label><input id="custName" placeholder="My Currency"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-accent" style="flex:1" onclick="saveCustomCurrency()">Add & Select</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('customCurForm').style.display='none'">Cancel</button>
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('currencyModal')">Cancel</button>
     </div>
@@ -617,9 +630,11 @@ function openSheet(id){
   const sh=GS();
   document.getElementById('activeSheetLabel').textContent=sh.emoji+' '+sh.name;
   document.getElementById('shareSheetBtn').style.display=sh.sheetUrl?'':'none';
+  document.getElementById('pullSheetBtn').style.display=sh.sheetUrl?'':'none';
   document.getElementById('sheetsScreen').classList.remove('active');
   document.getElementById('groupsScreen').classList.add('active');
   renderGroups();
+  if(sh.sheetUrl) pullFromSheet(sh,true); // silent background pull
 }
 
 function goBackToSheets(){
@@ -664,11 +679,7 @@ async function connectSheet(){
   try{
     const res=await fetch(url+'?action=read');
     const data=await res.json();
-    const groups=(data.groups||[]).map(g=>({
-      id:'g'+Date.now()+Math.random().toString(36).slice(2,7),
-      name:g.name,emoji:g.emoji||'👥',currency:g.currency||'QAR',
-      members:g.members||['You'],expenses:g.expenses||[]
-    }));
+    const groups=remoteGroupsToLocal(data.groups||[]);
     S.sheets.push({id:'s'+Date.now(),name,emoji:'🔗',sheetUrl:url,isLocal:false,groups});
     persist();closeModal('connectSheetModal');renderSheets();
     toast(`Connected! ${groups.length} group${groups.length!==1?'s':''} loaded.`);
@@ -701,6 +712,7 @@ function saveSheetSettings(){
   sh.name=name;sh.emoji=pickedSheetEmoji;sh.sheetUrl=url;sh.isLocal=!url;persist();
   document.getElementById('activeSheetLabel').textContent=sh.emoji+' '+sh.name;
   document.getElementById('shareSheetBtn').style.display=sh.sheetUrl?'':'none';
+  document.getElementById('pullSheetBtn').style.display=sh.sheetUrl?'':'none';
   document.getElementById('sheetStatus').textContent=sh.sheetUrl?'Sheet Connected':'Google Sheet';
   closeModal('sheetSettingsModal');toast('Sheet updated');
 }
@@ -828,11 +840,47 @@ function openCurrencyModal(){
 
 function renderCurrencyGrid(sel,filter){
   const filtered=filter?CURRENCIES.filter(c=>c.code.toLowerCase().includes(filter.toLowerCase())||c.name.toLowerCase().includes(filter.toLowerCase())):CURRENCIES;
+  const customTile=`<div class="currency-option" onclick="openCustomCurForm()" style="border:1px dashed var(--border);opacity:.7">
+    <div><span class="cur-sym">+</span><span class="cur-code" style="font-size:.7rem">CUSTOM</span></div>
+    <div class="cur-name">Add currency</div>
+  </div>`;
   document.getElementById('currencyGrid').innerHTML=filtered.map(c=>`
     <div class="currency-option${c.code===sel?' sel':''}" onclick="selectExpCur('${c.code}')">
       <div><span class="cur-sym">${c.sym}</span><span class="cur-code">${c.code}</span></div>
       <div class="cur-name">${c.name}</div>
-    </div>`).join('');
+    </div>`).join('')+customTile;
+}
+
+function openCustomCurForm(){
+  const f=document.getElementById('customCurForm');
+  f.style.display='block';
+  document.getElementById('custCode').value='';
+  document.getElementById('custSym').value='';
+  document.getElementById('custName').value='';
+  document.getElementById('custCode').focus();
+}
+
+function saveCustomCurrency(){
+  const code=document.getElementById('custCode').value.trim().toUpperCase();
+  const sym=document.getElementById('custSym').value.trim();
+  const name=document.getElementById('custName').value.trim()||code;
+  if(!code||code.length<2){toast('Enter a valid currency code');return;}
+  if(!sym){toast('Enter a symbol');return;}
+  if(!CURRENCIES.find(c=>c.code===code)){
+    CURRENCIES.push({code,sym,name});
+    const saved=JSON.parse(localStorage.getItem('splitit_custom_cur')||'[]');
+    saved.push({code,sym,name});
+    localStorage.setItem('splitit_custom_cur',JSON.stringify(saved));
+  }
+  selectExpCur(code);
+  document.getElementById('customCurForm').style.display='none';
+}
+
+function loadCustomCurrencies(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('splitit_custom_cur')||'[]');
+    saved.forEach(c=>{if(!CURRENCIES.find(x=>x.code===c.code))CURRENCIES.push(c);});
+  }catch(e){}
 }
 
 function selectExpCur(code){
@@ -905,6 +953,7 @@ function renderMembers(){
 // SPLIT
 // ══════════════════════════════════════
 let splitMode='equal';
+let editingExpenseId=null;
 
 function setSplitMode(mode,btn){
   splitMode=mode;
@@ -988,6 +1037,63 @@ function getSplitData(){
   return splits;
 }
 
+function normalizeDate(d){
+  if(!d) return new Date().toISOString().split('T')[0];
+  // Already YYYY-MM-DD
+  if(/^\d{4}-\d{2}-\d{2}$/.test(String(d))) return String(d);
+  // Try native Date parse (handles ISO strings, MM/DD/YYYY, etc.)
+  const dt=new Date(d);
+  if(!isNaN(dt.getTime())) return dt.toISOString().split('T')[0];
+  return new Date().toISOString().split('T')[0];
+}
+
+function editExpense(id){
+  const g=G();if(!g)return;
+  const exp=g.expenses.find(e=>e.id===id);if(!exp)return;
+  editingExpenseId=id;
+  // Fill basic fields
+  document.getElementById('expDesc').value=exp.desc;
+  document.getElementById('expAmount').value=exp.amount;
+  document.getElementById('expDate').value=normalizeDate(exp.date);
+  document.getElementById('expCategory').value=exp.category||'🍽️ Food';
+  document.getElementById('expPaidBy').value=exp.paidBy;
+  // Currency
+  if(CURRENCIES.find(c=>c.code===exp.currency)||true){
+    document.getElementById('expCurrency').value=exp.currency;
+    onCurrencyChange();
+  }
+  // Split mode
+  const mode=exp.splitMode||'equal';
+  splitMode=mode;
+  const modeIdx={equal:0,percent:1,amount:2}[mode]||0;
+  document.querySelectorAll('.split-btn').forEach((b,i)=>b.classList.toggle('active',i===modeIdx));
+  renderMembersSplit();
+  // Pre-fill split values after render (member order matches g.members)
+  if(mode==='equal'){
+    document.querySelectorAll('.split-check').forEach(chk=>{
+      chk.checked=(exp.splits[chk.value]||0)>0;
+    });
+  } else if(mode==='percent'){
+    const total=Object.values(exp.splits).reduce((a,v)=>a+parseFloat(v||0),0)||1;
+    document.querySelectorAll('.split-pct').forEach((inp,i)=>{
+      const member=g.members[i];
+      inp.value=member?((parseFloat(exp.splits[member]||0)/exp.amount)*100).toFixed(1):'0';
+    });
+  } else {
+    document.querySelectorAll('.split-amt').forEach((inp,i)=>{
+      const member=g.members[i];
+      inp.value=member?(exp.splits[member]||0):'0';
+    });
+  }
+  updateSplitAmounts();
+  // Update form UI
+  document.getElementById('expFormTitle').textContent='✏️ Edit Expense';
+  document.getElementById('expSubmitBtn').textContent='Save Changes';
+  // Scroll form into view
+  document.querySelector('.expense-form')?.scrollIntoView({behavior:'smooth',block:'start'});
+  toast('Editing expense — make changes and save');
+}
+
 function addExpense(){
   const g=G();if(!g)return;
   const desc=document.getElementById('expDesc').value.trim();
@@ -995,13 +1101,20 @@ function addExpense(){
   const currency=document.getElementById('expCurrency').value;
   const category=document.getElementById('expCategory').value;
   const paidBy=document.getElementById('expPaidBy').value;
-  const date=document.getElementById('expDate').value;
+  const date=normalizeDate(document.getElementById('expDate').value);
   if(!desc){toast('Enter a description');return;}
   if(!amount||amount<=0){toast('Enter a valid amount');return;}
   const splits=getSplitData();
-  g.expenses.unshift({id:Date.now(),desc,amount,currency,category,paidBy,date,splits,splitMode});
-  persist();renderExpenses();updateSummary();clearForm();syncToSheet();
-  toast(`"${desc}" added — ${fmtCode(amount,currency)}`);
+  if(editingExpenseId!==null){
+    const idx=g.expenses.findIndex(e=>e.id===editingExpenseId);
+    if(idx>=0) g.expenses[idx]={...g.expenses[idx],desc,amount,currency,category,paidBy,date,splits,splitMode};
+    persist();renderExpenses();renderBalances();updateSummary();clearForm();syncToSheet();
+    toast(`"${desc}" updated`);
+  } else {
+    g.expenses.unshift({id:Date.now(),desc,amount,currency,category,paidBy,date,splits,splitMode});
+    persist();renderExpenses();updateSummary();clearForm();syncToSheet();
+    toast(`"${desc}" added — ${fmtCode(amount,currency)}`);
+  }
 }
 
 function deleteExpense(id){
@@ -1012,9 +1125,14 @@ function deleteExpense(id){
 }
 
 function clearForm(){
+  editingExpenseId=null;
   document.getElementById('expDesc').value='';
   document.getElementById('expAmount').value='';
   document.getElementById('expDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('expFormTitle').textContent='+ Add Expense';
+  document.getElementById('expSubmitBtn').textContent='Add Expense';
+  splitMode='equal';
+  document.querySelectorAll('.split-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   renderMembersSplit();
 }
 
@@ -1058,6 +1176,7 @@ function renderExpenses(){
         <div class="expense-paid-by">Paid by ${e.paidBy}</div>
       </div>
       <div style="display:flex;gap:5px">
+        <button class="icon-btn" onclick="editExpense(${e.id})" title="Edit">✏️</button>
         <button class="icon-btn" onclick="deleteExpense(${e.id})" title="Delete">🗑</button>
       </div>
     </div>`;
@@ -1154,12 +1273,48 @@ function updateSummary(){
 // ══════════════════════════════════════
 // GOOGLE SHEET SYNC
 // ══════════════════════════════════════
+function remoteGroupsToLocal(remoteGroups){
+  // Preserve the remote group id so all users share the same group identity
+  return remoteGroups.map(g=>({
+    id: g.id || ('g'+Date.now()+Math.random().toString(36).slice(2,7)),
+    name:g.name,emoji:g.emoji||'👥',currency:g.currency||'QAR',
+    members:g.members||['You'],expenses:g.expenses||[]
+  }));
+}
+
+async function pullFromSheet(sh,silent){
+  if(!sh||!sh.sheetUrl)return;
+  try{
+    const res=await fetch(sh.sheetUrl+'?action=read');
+    const data=await res.json();
+    const remoteGroups=data.groups||[];
+    let added=0,updated=0;
+    remoteGroups.forEach(rg=>{
+      const remoteId=rg.id||rg.name; // fall back to name for old data
+      const localIdx=sh.groups.findIndex(lg=>lg.id===remoteId||lg.name===rg.name);
+      if(localIdx<0){
+        sh.groups.push(...remoteGroupsToLocal([rg]));
+        added++;
+      } else {
+        // Remote is source of truth for shared sheets — merge in remote expenses
+        sh.groups[localIdx].expenses=rg.expenses||[];
+        sh.groups[localIdx].members=rg.members||sh.groups[localIdx].members;
+        updated++;
+      }
+    });
+    persist();renderGroups();
+    if(!silent) toast(added?`↻ ${added} new group${added!==1?'s':''} pulled`:'↻ Groups up to date');
+  }catch(e){
+    if(!silent) toast('Could not pull from sheet. Check connection.');
+  }
+}
+
 function syncToSheet(){
   const sh=GS();if(!sh||!sh.sheetUrl)return;
   const g=G();if(!g)return;
   try{
     const payload=encodeURIComponent(JSON.stringify({
-      groupName:g.name,groupEmoji:g.emoji,currency:g.currency,
+      groupId:g.id,groupName:g.name,groupEmoji:g.emoji,currency:g.currency,
       expenses:g.expenses,members:g.members
     }));
     fetch(sh.sheetUrl+'?action=write&data='+payload,{method:'GET',mode:'no-cors'})
@@ -1290,6 +1445,7 @@ function toast(msg){
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
+loadCustomCurrencies();
 load();
 renderSheets();
 fillSel('newGroupCurrency','QAR');
