@@ -3,6 +3,8 @@
 
 function doGet(e) {
   try {
+    const action = e.parameter.action || 'write';
+    if (action === 'read') return readGroups();
     const raw = e.parameter.data;
     if (!raw) return reply({status: "no data"});
     const data = JSON.parse(decodeURIComponent(raw));
@@ -10,6 +12,17 @@ function doGet(e) {
     return reply({status: "ok"});
   } catch(err) {
     return reply({status: "error", msg: err.toString()});
+  }
+}
+
+function readGroups() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const meta = ss.getSheetByName('_meta');
+  if (!meta) return reply({groups: []});
+  try {
+    return reply(JSON.parse(meta.getRange(1,1).getValue()) || {groups: []});
+  } catch(e) {
+    return reply({groups: []});
   }
 }
 
@@ -23,6 +36,22 @@ function writeToSheet(data) {
     if (!sh) sh = ss.insertSheet(name);
     return sh;
   }
+
+  // Update _meta for read-back / connect flow
+  let meta = ss.getSheetByName('_meta');
+  if (!meta) { meta = ss.insertSheet('_meta'); meta.hideSheet(); }
+  let existing = {groups: []};
+  try { existing = JSON.parse(meta.getRange(1,1).getValue()) || {groups: []}; } catch(e) {}
+  const idx = existing.groups.findIndex(g => g.name === data.groupName);
+  const gd = {
+    name: data.groupName,
+    emoji: data.groupEmoji || '👥',
+    currency: cur,
+    members: data.members || [],
+    expenses: data.expenses || []
+  };
+  if (idx >= 0) existing.groups[idx] = gd; else existing.groups.push(gd);
+  meta.getRange(1,1).setValue(JSON.stringify(existing));
 
   // Expenses tab — one per group
   let sh = getOrCreate(grp + " — Expenses");

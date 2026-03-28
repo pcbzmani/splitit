@@ -15,24 +15,18 @@ body::after{content:'';position:fixed;bottom:-200px;right:-200px;width:500px;hei
 .screen{display:none;position:relative;z-index:1;}
 .screen.active{display:block;}
 
-/* GROUPS SCREEN */
-#groupsScreen{max-width:580px;margin:0 auto;padding:48px 16px 60px;}
+/* SHEETS SCREEN */
+#sheetsScreen{max-width:580px;margin:0 auto;padding:48px 16px 60px;}
 .brand{font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;letter-spacing:-1px;margin-bottom:4px;}
 .brand span{color:var(--accent);}
 .brand-sub{color:var(--muted);font-size:0.9rem;margin-bottom:36px;}
-.groups-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
-.group-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;animation:slideIn 0.3s ease;}
-.group-card:hover{border-color:var(--accent);transform:translateY(-1px);}
-.group-emoji{font-size:1.7rem;width:46px;height:46px;background:var(--surface2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.group-info{flex:1;min-width:0;}
-.group-name{font-family:'Syne',sans-serif;font-weight:700;}
-.group-meta{font-size:0.76rem;color:var(--muted);margin-top:3px;}
-.group-right{text-align:right;flex-shrink:0;}
-.group-total{font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);}
-.group-cur{font-size:0.7rem;color:var(--muted);}
-.group-arrow{color:var(--border);font-size:1.3rem;}
-.new-group-btn{width:100%;padding:14px;border-radius:var(--radius);border:2px dashed var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.9rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-.new-group-btn:hover{border-color:var(--accent);color:var(--accent);}
+.sheet-sync-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.68rem;background:rgba(110,231,183,0.1);border:1px solid rgba(110,231,183,0.2);border-radius:99px;padding:2px 8px;color:var(--accent);}
+.sheet-sync-badge.local{background:rgba(107,116,144,0.1);border-color:rgba(107,116,144,0.2);color:var(--muted);}
+
+/* GROUPS SCREEN */
+#groupsScreen .groups-wrap{max-width:580px;margin:0 auto;padding:32px 16px 60px;}
+.groups-screen-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+.groups-screen-title{display:flex;align-items:center;gap:10px;}
 
 /* APP SCREEN */
 #appScreen .app{max-width:920px;margin:0 auto;padding:22px 16px 80px;}
@@ -51,6 +45,23 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .currency-pill{background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:0.78rem;color:var(--accent);font-weight:700;cursor:pointer;transition:all 0.2s;font-family:'Syne',sans-serif;}
 .currency-pill:hover{border-color:var(--accent);}
 
+/* GROUP/SHEET CARDS */
+.groups-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.group-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;animation:slideIn 0.3s ease;}
+.group-card:hover{border-color:var(--accent);transform:translateY(-1px);}
+.group-emoji{font-size:1.7rem;width:46px;height:46px;background:var(--surface2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.group-info{flex:1;min-width:0;}
+.group-name{font-family:'Syne',sans-serif;font-weight:700;}
+.group-meta{font-size:0.76rem;color:var(--muted);margin-top:3px;}
+.group-right{text-align:right;flex-shrink:0;}
+.group-total{font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);}
+.group-cur{font-size:0.7rem;color:var(--muted);}
+.group-arrow{color:var(--border);font-size:1.3rem;}
+.new-group-btn{width:100%;padding:14px;border-radius:var(--radius);border:2px dashed var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.9rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.new-group-btn:hover{border-color:var(--accent);color:var(--accent);}
+.new-group-btn.connect{border-color:rgba(56,189,248,0.3);color:var(--accent2);}
+.new-group-btn.connect:hover{border-color:var(--accent2);}
+
 /* SUMMARY */
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:11px;margin-bottom:22px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px 17px;transition:border-color 0.2s;}
@@ -65,7 +76,6 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:22px;width:fit-content;}
 .tab{padding:7px 16px;border-radius:7px;font-size:0.82rem;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all 0.2s;font-family:'DM Sans',sans-serif;}
 .tab.active{background:var(--accent);color:#0d0f14;font-weight:700;}
-
 .section{display:none;}
 .section.active{display:block;}
 
@@ -175,7 +185,6 @@ select option{background:var(--surface2);}
 .filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
 .filter-chip{padding:4px 10px;border-radius:99px;font-size:0.74rem;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
 .filter-chip.active{background:var(--surface2);border-color:var(--accent2);color:var(--accent2);}
-
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.92rem;}
 .count-badge{background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:2px 9px;font-size:0.71rem;color:var(--muted);}
@@ -196,25 +205,38 @@ select option{background:var(--surface2);}
 </head>
 <body>
 
-<!-- ═══════════ GROUPS SCREEN ═══════════ -->
-<div class="screen active" id="groupsScreen">
-  <div id="groupsApp">
+<!-- ═══════════ SHEETS SCREEN ═══════════ -->
+<div class="screen active" id="sheetsScreen">
+  <div style="max-width:580px;margin:0 auto;padding:48px 16px 60px">
     <div class="brand">Split<span>It</span></div>
-    <div class="brand-sub">Track shared expenses, split bills, settle up.</div>
-
-    <div id="quickStartBanner" style="display:none;background:linear-gradient(135deg,rgba(110,231,183,0.08),rgba(56,189,248,0.06));border:1px solid rgba(110,231,183,0.2);border-radius:var(--radius);padding:20px 22px;margin-bottom:20px;">
-      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:5px">⚡ Jump right in</div>
-      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Start tracking expenses instantly — no group setup needed. You can organise into groups later.</div>
-      <button class="btn btn-primary" style="width:100%;padding:12px" onclick="startWithoutGroup()">Start Without a Group →</button>
+    <div class="brand-sub">Choose a workspace to track expenses.</div>
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px" id="sheetsLabel">Your Sheets</div>
+    <div class="groups-grid" id="sheetsList"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+      <button class="new-group-btn" onclick="openCreateSheet()">＋ New Sheet</button>
+      <button class="new-group-btn connect" onclick="openConnectSheet()">🔗 Connect Shared Sheet</button>
     </div>
+  </div>
+</div>
 
+<!-- ═══════════ GROUPS SCREEN ═══════════ -->
+<div class="screen" id="groupsScreen">
+  <div class="groups-wrap">
+    <div class="groups-screen-header">
+      <div class="groups-screen-title">
+        <button class="back-btn" onclick="goBackToSheets()">← Sheets</button>
+        <div id="activeSheetLabel" style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem"></div>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <button id="shareSheetBtn" class="btn btn-ghost" style="font-size:0.78rem;display:none" onclick="shareSheet()">⎘ Share</button>
+        <button class="btn btn-ghost" style="font-size:0.78rem" onclick="openSheetSettings()">⚙️</button>
+      </div>
+    </div>
     <div id="groupsListWrap">
-      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;display:none" id="groupsLabel">Your Groups</div>
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;display:none" id="groupsLabel">Groups</div>
       <div class="groups-grid" id="groupsList"></div>
     </div>
     <button class="new-group-btn" onclick="openCreateGroup()">＋ Create New Group</button>
-
-    <div style="text-align:center;margin-top:14px;font-size:0.8rem;color:var(--muted)" id="quickStartLink"></div>
   </div>
 </div>
 
@@ -230,7 +252,7 @@ select option{background:var(--surface2);}
     </div>
     <div class="header-right">
       <div class="currency-pill" onclick="openCurrencyModal()" id="currencyPill" title="Click to change expense currency">QAR</div>
-      <div class="sheet-badge" onclick="openSheetModal()">
+      <div class="sheet-badge" onclick="openSheetSettings()">
         <div class="dot"></div>
         <span id="sheetStatus">Google Sheet</span>
       </div>
@@ -344,18 +366,6 @@ select option{background:var(--surface2);}
       <select id="groupCurrencySelect" onchange="changeGroupCurrency(this.value)" style="max-width:300px"></select>
     </div>
 
-    <div class="form-card">
-      <div class="form-title">🔗 Google Sheets Sync</div>
-      <p style="font-size:0.81rem;color:var(--muted);line-height:1.7;margin-bottom:12px">
-        Deploy the Apps Script as a Web App, paste the URL below to auto-sync all expenses.
-      </p>
-      <div style="display:flex;gap:7px">
-        <input type="text" id="sheetUrl" placeholder="Paste Web App URL…" style="flex:1">
-        <button class="btn btn-primary" onclick="saveSheetUrl()">Connect</button>
-      </div>
-      <button class="btn btn-ghost" style="margin-top:9px;width:100%" onclick="openSheetModal()">📄 View Setup Instructions</button>
-    </div>
-
     <div class="form-card" style="border-color:rgba(248,113,113,0.2)">
       <div class="form-title" style="color:var(--danger)">⚠️ Danger Zone</div>
       <button class="btn btn-danger" onclick="deleteGroup()">Delete This Group</button>
@@ -392,6 +402,80 @@ select option{background:var(--surface2);}
   </div>
 </div>
 
+<!-- ═══════════ MODAL: Create Sheet ═══════════ -->
+<div class="modal-overlay" id="createSheetModal">
+  <div class="modal">
+    <div class="modal-title">✨ New Sheet</div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Sheet Name</label>
+      <input type="text" id="newSheetName" placeholder="e.g. Doha Trip, Flatmates, Personal…">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px">Pick an Emoji</label>
+      <div class="emoji-grid" id="sheetEmojiGrid"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:4px">
+      <label>Google Sheets Sync URL <span style="color:var(--muted);font-size:0.65rem">(optional — add later)</span></label>
+      <input type="text" id="newSheetUrl" placeholder="https://script.google.com/macros/s/…">
+    </div>
+    <div style="font-size:0.73rem;color:var(--muted);margin-top:5px;line-height:1.5">Leave empty for a local-only sheet. Share this URL with others to let them connect.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('createSheetModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createSheet()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: Connect Sheet ═══════════ -->
+<div class="modal-overlay" id="connectSheetModal">
+  <div class="modal">
+    <div class="modal-title">🔗 Connect Shared Sheet</div>
+    <div class="modal-desc">Someone shared a SplitIt sheet with you? Paste their Web App URL to join and sync expenses together.</div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Sheet Name</label>
+      <input type="text" id="connectSheetName" placeholder="e.g. Doha Trip, Roommates…">
+    </div>
+    <div class="form-group" style="margin-bottom:4px">
+      <label>Web App URL</label>
+      <input type="text" id="connectSheetUrl" placeholder="https://script.google.com/macros/s/…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('connectSheetModal')">Cancel</button>
+      <button class="btn btn-primary" id="connectSheetSubmit" onclick="connectSheet()">Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: Sheet Settings ═══════════ -->
+<div class="modal-overlay" id="sheetSettingsModal">
+  <div class="modal">
+    <div class="modal-title">⚙️ Sheet Settings</div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Sheet Name</label>
+      <input type="text" id="editSheetName">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px">Emoji</label>
+      <div class="emoji-grid" id="editSheetEmojiGrid"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:4px">
+      <label>Google Sheets Sync URL</label>
+      <input type="text" id="editSheetUrl" placeholder="https://script.google.com/macros/s/…">
+    </div>
+    <div style="font-size:0.73rem;color:var(--muted);margin-top:5px;margin-bottom:14px;line-height:1.5">Share this URL with others so they can connect to this sheet and sync expenses.</div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:4px">
+      <button class="btn btn-ghost" style="font-size:0.78rem;width:100%" onclick="openSheetScriptModal()">📄 View Apps Script Setup Instructions</button>
+    </div>
+    <div class="modal-actions" style="border-top:1px solid var(--border);padding-top:12px;justify-content:space-between">
+      <button class="btn btn-danger" style="font-size:0.78rem" onclick="deleteSheet()">Delete Sheet</button>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-ghost" onclick="closeModal('sheetSettingsModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSheetSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ MODAL: Currency Picker ═══════════ -->
 <div class="modal-overlay" id="currencyModal">
   <div class="modal" style="max-width:460px">
@@ -404,26 +488,19 @@ select option{background:var(--surface2);}
   </div>
 </div>
 
-<!-- ═══════════ MODAL: Google Sheet ═══════════ -->
+<!-- ═══════════ MODAL: Apps Script Setup ═══════════ -->
 <div class="modal-overlay" id="sheetModal">
   <div class="modal">
-    <div class="modal-title">📊 Connect Google Sheets</div>
+    <div class="modal-title">📊 Apps Script Setup</div>
     <div class="modal-desc">
       <b>1.</b> Open your Google Sheet → <b>Extensions → Apps Script</b><br><br>
       <b>2.</b> Delete existing code, paste the script below, click Save<br><br>
       <b>3.</b> Click <b>Deploy → New Deployment</b><br>
       &nbsp;&nbsp;&nbsp;Type: <b>Web App</b> · Execute as: <b>Me</b> · Access: <b>Anyone</b><br><br>
-      <b>4.</b> Copy the <b>Web App URL</b> → paste in Members tab → Connect<br><br>
+      <b>4.</b> Copy the <b>Web App URL</b> → paste in Sheet Settings<br><br>
       <span style="color:var(--warn);font-size:0.78rem">⚠️ Always use New Deployment (not Manage) each time.</span>
     </div>
     <div class="code-block" id="appsScriptCode"></div>
-    <div style="margin-top:14px">
-      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px">Paste your Web App URL</div>
-      <div style="display:flex;gap:7px">
-        <input type="text" id="sheetUrlModal" placeholder="https://script.google.com/macros/s/…" style="flex:1" oninput="document.getElementById('saveSheetBtn').style.opacity=this.value.trim()?'1':'0.4'">
-        <button id="saveSheetBtn" class="btn btn-primary" style="opacity:0.4;transition:opacity 0.2s" onclick="saveSheetUrlFromModal()">Save</button>
-      </div>
-    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('sheetModal')">Close</button>
       <button class="btn btn-primary" onclick="copyScript()">📋 Copy Script</button>
@@ -480,51 +557,181 @@ function fmt(amount,code){const c=getCur(code);return `${c.sym}${parseFloat(amou
 function fmtCode(amount,code){return `${fmt(amount,code)} ${code}`;}
 
 // ══════════════════════════════════════
-// STATE
+// STATE  (v3: sheets > groups > expenses)
 // ══════════════════════════════════════
-let S={groups:[],activeId:null};
+let S={sheets:[],activeSheetId:null,activeGroupId:null};
 
-function load(){try{const d=localStorage.getItem('splitit_v2');if(d)S=JSON.parse(d);}catch(e){}}
-function persist(){localStorage.setItem('splitit_v2',JSON.stringify(S));}
-function G(){return S.groups.find(g=>g.id===S.activeId);}
+function load(){
+  try{
+    const d3=localStorage.getItem('splitit_v3');
+    if(d3){S=JSON.parse(d3);return;}
+    // Migrate from v2
+    const d2=localStorage.getItem('splitit_v2');
+    if(d2){
+      const old=JSON.parse(d2);
+      S={
+        sheets:[{id:'local',name:'Personal',emoji:'🔒',sheetUrl:'',isLocal:true,groups:old.groups||[]}],
+        activeSheetId:null,activeGroupId:null
+      };
+      persist();return;
+    }
+  }catch(e){}
+  // Fresh start
+  S={sheets:[{id:'local',name:'Personal',emoji:'🔒',sheetUrl:'',isLocal:true,groups:[]}],activeSheetId:null,activeGroupId:null};
+}
+
+function persist(){localStorage.setItem('splitit_v3',JSON.stringify(S));}
+function GS(){return S.sheets.find(s=>s.id===S.activeSheetId);}
+function G(){const sh=GS();return sh&&sh.groups.find(g=>g.id===S.activeGroupId);}
+
+// ══════════════════════════════════════
+// SHEETS SCREEN
+// ══════════════════════════════════════
+const EMOJIS=['✈️','🏠','🎉','🍕','🚗','🌊','⛺','🎮','💼','🏖️','🍻','🎸','🏋️','📚','🌍','🎯','🛒','💊','🐾','🌸','🎂','🎁'];
+let pickedSheetEmoji='📋';
+let pickedGroupEmoji='✈️';
+
+function renderSheets(){
+  const el=document.getElementById('sheetsList');
+  if(!S.sheets.length){el.innerHTML='';return;}
+  el.innerHTML=S.sheets.map(s=>{
+    const totalGroups=s.groups.length;
+    const totalExp=s.groups.reduce((sum,g)=>sum+g.expenses.length,0);
+    const badge=s.sheetUrl
+      ?`<span class="sheet-sync-badge"><span style="width:5px;height:5px;border-radius:50%;background:var(--accent);display:inline-block"></span> Synced</span>`
+      :`<span class="sheet-sync-badge local">Local</span>`;
+    return `<div class="group-card" onclick="openSheet('${s.id}')">
+      <div class="group-emoji">${s.emoji}</div>
+      <div class="group-info">
+        <div class="group-name">${s.name}</div>
+        <div class="group-meta">${totalGroups} group${totalGroups!==1?'s':''} · ${totalExp} expense${totalExp!==1?'s':''}</div>
+      </div>
+      <div class="group-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">${badge}</div>
+      <div class="group-arrow">›</div>
+    </div>`;
+  }).join('');
+}
+
+function openSheet(id){
+  S.activeSheetId=id;persist();
+  const sh=GS();
+  document.getElementById('activeSheetLabel').textContent=sh.emoji+' '+sh.name;
+  document.getElementById('shareSheetBtn').style.display=sh.sheetUrl?'':'none';
+  document.getElementById('sheetsScreen').classList.remove('active');
+  document.getElementById('groupsScreen').classList.add('active');
+  renderGroups();
+}
+
+function goBackToSheets(){
+  document.getElementById('groupsScreen').classList.remove('active');
+  document.getElementById('sheetsScreen').classList.add('active');
+  S.activeSheetId=null;persist();
+  renderSheets();
+}
+
+function openCreateSheet(){
+  pickedSheetEmoji='📋';
+  document.getElementById('sheetEmojiGrid').innerHTML=EMOJIS.map(e=>`<div class="emoji-opt${e===pickedSheetEmoji?' sel':''}" onclick="pickSheetEmoji(this,'${e}')">${e}</div>`).join('');
+  document.getElementById('newSheetName').value='';
+  document.getElementById('newSheetUrl').value='';
+  openModal('createSheetModal');
+}
+function pickSheetEmoji(el,e){document.querySelectorAll('#sheetEmojiGrid .emoji-opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');pickedSheetEmoji=e;}
+
+function createSheet(){
+  const name=document.getElementById('newSheetName').value.trim();
+  if(!name){toast('Enter a sheet name');return;}
+  const url=document.getElementById('newSheetUrl').value.trim();
+  if(url&&!url.includes('script.google.com')){toast('Paste a valid Apps Script URL');return;}
+  S.sheets.push({id:'s'+Date.now(),name,emoji:pickedSheetEmoji,sheetUrl:url,isLocal:!url,groups:[]});
+  persist();closeModal('createSheetModal');renderSheets();
+  toast(`"${name}" created!`);
+}
+
+function openConnectSheet(){
+  document.getElementById('connectSheetName').value='';
+  document.getElementById('connectSheetUrl').value='';
+  openModal('connectSheetModal');
+}
+
+async function connectSheet(){
+  const name=document.getElementById('connectSheetName').value.trim();
+  const url=document.getElementById('connectSheetUrl').value.trim();
+  if(!name){toast('Enter a name for this sheet');return;}
+  if(!url||!url.includes('script.google.com')){toast('Paste a valid Apps Script URL');return;}
+  const btn=document.getElementById('connectSheetSubmit');
+  btn.textContent='Connecting…';btn.disabled=true;
+  try{
+    const res=await fetch(url+'?action=read');
+    const data=await res.json();
+    const groups=(data.groups||[]).map(g=>({
+      id:'g'+Date.now()+Math.random().toString(36).slice(2,7),
+      name:g.name,emoji:g.emoji||'👥',currency:g.currency||'QAR',
+      members:g.members||['You'],expenses:g.expenses||[]
+    }));
+    S.sheets.push({id:'s'+Date.now(),name,emoji:'🔗',sheetUrl:url,isLocal:false,groups});
+    persist();closeModal('connectSheetModal');renderSheets();
+    toast(`Connected! ${groups.length} group${groups.length!==1?'s':''} loaded.`);
+  }catch(e){
+    toast('Could not connect. Check the URL and try again.');
+  }finally{btn.textContent='Connect';btn.disabled=false;}
+}
+
+function shareSheet(){
+  const sh=GS();if(!sh||!sh.sheetUrl)return;
+  navigator.clipboard.writeText(sh.sheetUrl).then(()=>toast('Share URL copied!'));
+}
+
+function openSheetSettings(){
+  const sh=GS();if(!sh)return;
+  pickedSheetEmoji=sh.emoji;
+  document.getElementById('editSheetName').value=sh.name;
+  document.getElementById('editSheetUrl').value=sh.sheetUrl||'';
+  document.getElementById('editSheetEmojiGrid').innerHTML=EMOJIS.map(e=>`<div class="emoji-opt${e===sh.emoji?' sel':''}" onclick="pickEditSheetEmoji(this,'${e}')">${e}</div>`).join('');
+  openModal('sheetSettingsModal');
+}
+function pickEditSheetEmoji(el,e){document.querySelectorAll('#editSheetEmojiGrid .emoji-opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');pickedSheetEmoji=e;}
+
+function saveSheetSettings(){
+  const sh=GS();if(!sh)return;
+  const name=document.getElementById('editSheetName').value.trim();
+  if(!name){toast('Enter a name');return;}
+  const url=document.getElementById('editSheetUrl').value.trim();
+  if(url&&!url.includes('script.google.com')){toast('Paste a valid Apps Script URL');return;}
+  sh.name=name;sh.emoji=pickedSheetEmoji;sh.sheetUrl=url;sh.isLocal=!url;persist();
+  document.getElementById('activeSheetLabel').textContent=sh.emoji+' '+sh.name;
+  document.getElementById('shareSheetBtn').style.display=sh.sheetUrl?'':'none';
+  document.getElementById('sheetStatus').textContent=sh.sheetUrl?'Sheet Connected':'Google Sheet';
+  closeModal('sheetSettingsModal');toast('Sheet updated');
+}
+
+function deleteSheet(){
+  const sh=GS();if(!sh)return;
+  if(sh.id==='local'&&S.sheets.length===1){toast("Can't delete your only sheet");return;}
+  if(!confirm(`Delete "${sh.name}" and all its groups? This cannot be undone.`))return;
+  S.sheets=S.sheets.filter(s=>s.id!==sh.id);S.activeSheetId=null;persist();
+  closeModal('sheetSettingsModal');goBackToSheets();toast('Sheet deleted');
+}
+
+function openSheetScriptModal(){
+  closeModal('sheetSettingsModal');
+  document.getElementById('appsScriptCode').textContent=getAppsScript();
+  openModal('sheetModal');
+}
 
 // ══════════════════════════════════════
 // GROUPS SCREEN
 // ══════════════════════════════════════
-const EMOJIS=['✈️','🏠','🎉','🍕','🚗','🌊','⛺','🎮','💼','🏖️','🍻','🎸','🏋️','📚','🌍','🎯','🛒','💊','🐾','🌸','🎂','🎁'];
-let pickedEmoji='✈️';
-
 function renderGroups(){
+  const sh=GS();if(!sh)return;
   const el=document.getElementById('groupsList');
-  // Separate the default solo group from real groups
-  const realGroups=S.groups.filter(g=>!g.isDefault);
-  const soloGroup=S.groups.find(g=>g.isDefault);
-
-  const banner=document.getElementById('quickStartBanner');
   const label=document.getElementById('groupsLabel');
-  const quickLink=document.getElementById('quickStartLink');
-
-  // Show banner only if no real groups exist yet
-  if(banner) banner.style.display=realGroups.length===0?'block':'none';
-  if(label) label.style.display=realGroups.length>0?'block':'none';
-
-  // Show "or start without group" link when groups exist
-  if(quickLink){
-    if(realGroups.length>0 && !soloGroup){
-      quickLink.innerHTML=`<span style="cursor:pointer;color:var(--accent2);text-decoration:underline" onclick="startWithoutGroup()">or start without a group →</span>`;
-    } else if(soloGroup){
-      quickLink.innerHTML=`<span style="cursor:pointer;color:var(--muted)" onclick="openGroup('${soloGroup.id}')">↩ Continue with My Expenses</span>`;
-    } else {
-      quickLink.innerHTML='';
-    }
-  }
-
-  if(!realGroups.length){
-    el.innerHTML='';
+  if(label)label.style.display=sh.groups.length>0?'block':'none';
+  if(!sh.groups.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">👥</div><div class="empty-title">No groups yet</div><div>Create a group to start tracking expenses</div></div>`;
     return;
   }
-
-  el.innerHTML=realGroups.map(g=>{
+  el.innerHTML=sh.groups.map(g=>{
     const total=g.expenses.reduce((s,e)=>s+e.amount,0);
     const c=getCur(g.currency);
     return `<div class="group-card" onclick="openGroup('${g.id}')">
@@ -543,43 +750,34 @@ function renderGroups(){
 }
 
 function openCreateGroup(){
-  pickedEmoji=EMOJIS[0];
-  document.getElementById('emojiGrid').innerHTML=EMOJIS.map(e=>`<div class="emoji-opt${e===pickedEmoji?' sel':''}" onclick="pickEmoji(this,'${e}')">${e}</div>`).join('');
+  pickedGroupEmoji=EMOJIS[0];
+  document.getElementById('emojiGrid').innerHTML=EMOJIS.map(e=>`<div class="emoji-opt${e===pickedGroupEmoji?' sel':''}" onclick="pickGroupEmoji(this,'${e}')">${e}</div>`).join('');
   fillSel('newGroupCurrency','QAR');
   document.getElementById('newGroupName').value='';
   document.getElementById('newGroupMembers').value='You\n';
   openModal('createGroupModal');
 }
-function pickEmoji(el,e){document.querySelectorAll('.emoji-opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');pickedEmoji=e;}
+function pickGroupEmoji(el,e){document.querySelectorAll('#emojiGrid .emoji-opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');pickedGroupEmoji=e;}
 
 function createGroup(){
+  const sh=GS();if(!sh)return;
   const name=document.getElementById('newGroupName').value.trim();
   if(!name){toast('Enter a group name');return;}
   const currency=document.getElementById('newGroupCurrency').value;
   const members=document.getElementById('newGroupMembers').value.split('\n').map(m=>m.trim()).filter(Boolean);
   if(!members.length){toast('Add at least one member');return;}
-  S.groups.push({id:'g'+Date.now(),name,emoji:pickedEmoji,currency,members,expenses:[],sheetUrl:''});
-  persist();
-  closeModal('createGroupModal');
-  renderGroups();
-  toast(`"${name}" created!`);
+  sh.groups.push({id:'g'+Date.now(),name,emoji:pickedGroupEmoji,currency,members,expenses:[]});
+  persist();closeModal('createGroupModal');renderGroups();toast(`"${name}" created!`);
 }
 
 function openGroup(id){
-  S.activeId=id;persist();
+  S.activeGroupId=id;persist();
   const g=G();
-  // Header pill — hide for default solo mode
-  const pill=document.getElementById('headerGroupName');
-  pill.textContent=g.isDefault?'':g.emoji+' '+g.name;
-  pill.style.display=g.isDefault?'none':'';
-  // Back button label
-  document.querySelector('.back-btn').textContent=g.isDefault?'← Back':'← Groups';
-  document.getElementById('sheetUrl').value=g.sheetUrl||'';
-  document.getElementById('sheetStatus').textContent=g.sheetUrl?'Sheet Connected':'Google Sheet';
-
+  const sh=GS();
+  document.getElementById('headerGroupName').textContent=g.emoji+' '+g.name;
+  document.getElementById('sheetStatus').textContent=sh.sheetUrl?'Sheet Connected':'Google Sheet';
   document.getElementById('groupsScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
-
   document.getElementById('expDate').value=new Date().toISOString().split('T')[0];
   fillSel('expCurrency',g.currency);
   fillSel('groupCurrencySelect',g.currency);
@@ -590,9 +788,7 @@ function openGroup(id){
   document.querySelectorAll('.section').forEach((s,i)=>s.classList.toggle('active',i===0));
   splitMode='equal';
   document.querySelectorAll('.split-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
-
   renderPaidBySelect();renderMembersSplit();renderExpenses();renderBalances();renderMembers();updateSummary();
-  document.getElementById('appsScriptCode').textContent=getAppsScript();
 }
 
 function goBack(){
@@ -602,10 +798,9 @@ function goBack(){
 }
 
 function deleteGroup(){
-  const g=G();
-  if(g.isDefault){toast("Use the Members tab to rename this workspace");return;}
+  const g=G();const sh=GS();if(!g||!sh)return;
   if(!confirm(`Delete "${g.name}"? This cannot be undone.`))return;
-  S.groups=S.groups.filter(x=>x.id!==g.id);S.activeId=null;persist();goBack();toast('Group deleted');
+  sh.groups=sh.groups.filter(x=>x.id!==g.id);S.activeGroupId=null;persist();goBack();toast('Group deleted');
 }
 
 // ══════════════════════════════════════
@@ -724,7 +919,6 @@ function renderMembersSplit(){
   const n=g.members.length;
   const code=getActiveExpCurrency();
   const c=getCur(code);
-
   document.getElementById('membersSplit').innerHTML=g.members.map((m,i)=>{
     const eq=n>0?(amount/n).toFixed(2):'0.00';
     const eqp=n>0?(100/n).toFixed(1):'0';
@@ -917,7 +1111,6 @@ function renderBalances(){
       <div class="balance-amount ${cls}">${b>0.01?'+':''}${c.sym}${Math.abs(b).toFixed(2)}</div>
     </div>`;
   }).join('');
-
   const settlements=computeSettlements(bal);
   const sel=document.getElementById('settlementsList');
   if(!settlements.length){
@@ -962,23 +1155,20 @@ function updateSummary(){
 // GOOGLE SHEET SYNC
 // ══════════════════════════════════════
 function syncToSheet(){
-  const g=G();if(!g||!g.sheetUrl)return;
+  const sh=GS();if(!sh||!sh.sheetUrl)return;
+  const g=G();if(!g)return;
   try{
-    const payload=encodeURIComponent(JSON.stringify({groupName:g.name,currency:g.currency,expenses:g.expenses,members:g.members}));
-    fetch(g.sheetUrl+'?data='+payload,{method:'GET',mode:'no-cors'})
-      .then(()=>{document.getElementById('sheetStatus').textContent='✓ Synced';setTimeout(()=>document.getElementById('sheetStatus').textContent='Sheet Connected',2000);})
+    const payload=encodeURIComponent(JSON.stringify({
+      groupName:g.name,groupEmoji:g.emoji,currency:g.currency,
+      expenses:g.expenses,members:g.members
+    }));
+    fetch(sh.sheetUrl+'?action=write&data='+payload,{method:'GET',mode:'no-cors'})
+      .then(()=>{
+        document.getElementById('sheetStatus').textContent='✓ Synced';
+        setTimeout(()=>document.getElementById('sheetStatus').textContent='Sheet Connected',2000);
+      })
       .catch(()=>{});
   }catch(e){}
-}
-
-function saveSheetUrl(){
-  const g=G();if(!g)return;
-  const url=document.getElementById('sheetUrl').value.trim();
-  if(url&&!url.includes('script.google.com')){toast('Paste an Apps Script Web App URL');return;}
-  g.sheetUrl=url;persist();
-  document.getElementById('sheetStatus').textContent=url?'Sheet Connected':'Google Sheet';
-  toast(url?'Sheet connected! Syncing…':'URL cleared');
-  if(url)syncToSheet();
 }
 
 // ══════════════════════════════════════
@@ -990,6 +1180,8 @@ function getAppsScript(){
 
 function doGet(e) {
   try {
+    const action = e.parameter.action || 'write';
+    if (action === 'read') return readGroups();
     const raw = e.parameter.data;
     if (!raw) return reply({status: "no data"});
     const data = JSON.parse(decodeURIComponent(raw));
@@ -1000,16 +1192,37 @@ function doGet(e) {
   }
 }
 
+function readGroups() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const meta = ss.getSheetByName('_meta');
+  if (!meta) return reply({groups: []});
+  try {
+    return reply(JSON.parse(meta.getRange(1,1).getValue()) || {groups: []});
+  } catch(e) {
+    return reply({groups: []});
+  }
+}
+
 function writeToSheet(data) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const cur = data.currency || "QAR";
-  const grp = (data.groupName || "Default").replace(/[:\\/?*[\]]/g, "").substring(0, 25);
+  const grp = (data.groupName || "Default").replace(/[:\\/?*[\\]]/g, "").substring(0, 25);
 
   function getOrCreate(name) {
     let sh = ss.getSheetByName(name);
     if (!sh) sh = ss.insertSheet(name);
     return sh;
   }
+
+  // Update _meta for read-back / connect flow
+  let meta = ss.getSheetByName('_meta');
+  if (!meta) { meta = ss.insertSheet('_meta'); meta.hideSheet(); }
+  let existing = {groups: []};
+  try { existing = JSON.parse(meta.getRange(1,1).getValue()) || {groups: []}; } catch(e) {}
+  const idx = existing.groups.findIndex(g => g.name === data.groupName);
+  const gd = {name:data.groupName,emoji:data.groupEmoji||'👥',currency:cur,members:data.members||[],expenses:data.expenses||[]};
+  if (idx >= 0) existing.groups[idx] = gd; else existing.groups.push(gd);
+  meta.getRange(1,1).setValue(JSON.stringify(existing));
 
   // Expenses tab — one per group
   let sh = getOrCreate(grp + " — Expenses");
@@ -1063,25 +1276,6 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});
 });
-function openSheetModal(){
-  document.getElementById('appsScriptCode').textContent=getAppsScript();
-  const g=G();
-  const inp=document.getElementById('sheetUrlModal');
-  inp.value=g?g.sheetUrl||'':'';
-  document.getElementById('saveSheetBtn').style.opacity=inp.value.trim()?'1':'0.4';
-  openModal('sheetModal');
-}
-function saveSheetUrlFromModal(){
-  const url=document.getElementById('sheetUrlModal').value.trim();
-  if(url&&!url.includes('script.google.com')){toast('Paste an Apps Script Web App URL');return;}
-  const g=G();if(!g)return;
-  g.sheetUrl=url;persist();
-  document.getElementById('sheetUrl').value=url;
-  document.getElementById('sheetStatus').textContent=url?'Sheet Connected':'Google Sheet';
-  toast(url?'Sheet connected! Syncing…':'URL cleared');
-  closeModal('sheetModal');
-  if(url)syncToSheet();
-}
 function copyScript(){navigator.clipboard.writeText(getAppsScript()).then(()=>toast('Script copied!'));}
 
 // ══════════════════════════════════════
@@ -1094,32 +1288,10 @@ function toast(msg){
 }
 
 // ══════════════════════════════════════
-// QUICK START (no group)
-// ══════════════════════════════════════
-const DEFAULT_GROUP_ID = 'default_solo';
-
-function startWithoutGroup(){
-  if(!S.groups.find(g=>g.id===DEFAULT_GROUP_ID)){
-    S.groups.unshift({
-      id: DEFAULT_GROUP_ID,
-      name: 'My Expenses',
-      emoji: '💸',
-      currency: 'QAR',
-      members: ['You','Friend'],
-      expenses: [],
-      sheetUrl: '',
-      isDefault: true
-    });
-    persist();
-  }
-  openGroup(DEFAULT_GROUP_ID);
-}
-
-// ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
 load();
-renderGroups();
+renderSheets();
 fillSel('newGroupCurrency','QAR');
 </script>
 </body>

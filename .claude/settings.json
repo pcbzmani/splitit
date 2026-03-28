@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/pcbzm/.claude/projects/e--Projects-AI-splitit/memory/**)",
+      "Bash(npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest init --defaults -y)",
+      "Bash(npx shadcn@latest add input label card dialog sheet form tabs avatar badge toast dropdown-menu select textarea separator skeleton progress alert scroll-area --yes)",
+      "Bash(npx shadcn@latest add sonner --yes)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(mkdir -p tests/screenshots)",
+      "Bash(npx playwright:*)",
+      "Bash(curl -v http://localhost:3000/login)",
+      "Bash(curl -s http://localhost:3000/pricing)",
+      "Bash(curl -s http://localhost:3000/login)",
+      "Bash(python3 -c \"import sys; data = sys.stdin.read\\(\\); print\\(len\\(data\\), data[:500]\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(curl -s http://127.0.0.1:3001/login)",
+      "Bash(curl -s http://127.0.0.1:3000/login)",
+      "Bash(curl -s http://[::1]:3000/login)",
+      "Bash(ls \"e:/Projects_AI/splitit/frontend/src/app/\\(auth\\)/\")",
+      "Bash(ls \"e:/Projects_AI/splitit/frontend/src/app/\\(auth\\)/login/\")",
+      "Bash(cat \"e:/Projects_AI/splitit/frontend/src/app/\\(auth\\)/login/page.tsx\")",
+      "Bash(taskkill /PID 16244 /F)",
+      "Bash(cmd /c \"taskkill /PID 16244 /F\")",
+      "Read(//tmp/**)",
+      "Bash(cmd /c \"tasklist /FI \"\"PID eq 16244\"\"\")",
+      "Bash(cmd /c \"rmdir /s /q \"\"e:\\\\Projects_AI\\\\splitit\\\\frontend\\\\.next\\\\dev\"\"\")",
+      "Bash(gh auth:*)",
+      "Bash(gh --version)"
+    ],
+    "additionalDirectories": [
+      "e:\\Projects_AI\\splitit\\frontend\\.git"
+    ]
+  }
+}
