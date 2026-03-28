@@ -778,8 +778,10 @@ function createGroup(){
   const currency=document.getElementById('newGroupCurrency').value;
   const members=document.getElementById('newGroupMembers').value.split('\n').map(m=>m.trim()).filter(Boolean);
   if(!members.length){toast('Add at least one member');return;}
-  sh.groups.push({id:'g'+Date.now(),name,emoji:pickedGroupEmoji,currency,members,expenses:[]});
+  const newG={id:'g'+Date.now(),name,emoji:pickedGroupEmoji,currency,members,expenses:[]};
+  sh.groups.push(newG);
   persist();closeModal('createGroupModal');renderGroups();toast(`"${name}" created!`);
+  syncGroupToSheet(sh,newG);
 }
 
 function openGroup(id){
@@ -1289,19 +1291,42 @@ async function pullFromSheet(sh,silent){
     const data=await res.json();
     const remoteGroups=data.groups||[];
     let added=0,updated=0;
+    const matchedLocalIdxs=new Set();
+
+    // Pass 1: match by id (authoritative — never collides)
     remoteGroups.forEach(rg=>{
-      const remoteId=rg.id||rg.name; // fall back to name for old data
-      const localIdx=sh.groups.findIndex(lg=>lg.id===remoteId||lg.name===rg.name);
+      if(!rg.id)return;
+      const localIdx=sh.groups.findIndex(lg=>lg.id===rg.id);
+      if(localIdx>=0){
+        sh.groups[localIdx].expenses=rg.expenses||[];
+        sh.groups[localIdx].members=rg.members||sh.groups[localIdx].members;
+        matchedLocalIdxs.add(localIdx);
+        updated++;
+      }
+    });
+
+    // Pass 2: name fallback only for remote groups not yet matched by id,
+    // and only against local groups not yet matched
+    remoteGroups.forEach(rg=>{
+      if(rg.id&&sh.groups.some(lg=>lg.id===rg.id))return; // already matched
+      const localIdx=sh.groups.findIndex((lg,i)=>!matchedLocalIdxs.has(i)&&lg.name===rg.name);
       if(localIdx<0){
         sh.groups.push(...remoteGroupsToLocal([rg]));
         added++;
       } else {
-        // Remote is source of truth for shared sheets — merge in remote expenses
+        const oldId=sh.groups[localIdx].id;
         sh.groups[localIdx].expenses=rg.expenses||[];
         sh.groups[localIdx].members=rg.members||sh.groups[localIdx].members;
+        // Adopt canonical remote id so future syncs use the same id and _meta stays clean
+        if(rg.id&&oldId!==rg.id){
+          sh.groups[localIdx].id=rg.id;
+          syncGroupToSheet(sh,sh.groups[localIdx]); // re-sync with correct id
+        }
+        matchedLocalIdxs.add(localIdx);
         updated++;
       }
     });
+
     persist();renderGroups();
     if(!silent) toast(added?`↻ ${added} new group${added!==1?'s':''} pulled`:'↻ Groups up to date');
   }catch(e){
@@ -1309,21 +1334,24 @@ async function pullFromSheet(sh,silent){
   }
 }
 
-function syncToSheet(){
-  const sh=GS();if(!sh||!sh.sheetUrl)return;
-  const g=G();if(!g)return;
+// Sync a specific group to a specific sheet (no-cors fire-and-forget)
+function syncGroupToSheet(sh,g){
+  if(!sh||!sh.sheetUrl||!g)return;
   try{
     const payload=encodeURIComponent(JSON.stringify({
       groupId:g.id,groupName:g.name,groupEmoji:g.emoji,currency:g.currency,
       expenses:g.expenses,members:g.members
     }));
-    fetch(sh.sheetUrl+'?action=write&data='+payload,{method:'GET',mode:'no-cors'})
-      .then(()=>{
-        document.getElementById('sheetStatus').textContent='✓ Synced';
-        setTimeout(()=>document.getElementById('sheetStatus').textContent='Sheet Connected',2000);
-      })
-      .catch(()=>{});
+    fetch(sh.sheetUrl+'?action=write&data='+payload,{method:'GET',mode:'no-cors'}).catch(()=>{});
   }catch(e){}
+}
+
+function syncToSheet(){
+  const sh=GS();if(!sh||!sh.sheetUrl)return;
+  const g=G();if(!g)return;
+  syncGroupToSheet(sh,g);
+  document.getElementById('sheetStatus').textContent='✓ Synced';
+  setTimeout(()=>document.getElementById('sheetStatus').textContent='Sheet Connected',2000);
 }
 
 // ══════════════════════════════════════
@@ -1374,9 +1402,28 @@ function writeToSheet(data) {
   if (!meta) { meta = ss.insertSheet('_meta'); meta.hideSheet(); }
   let existing = {groups: []};
   try { existing = JSON.parse(meta.getRange(1,1).getValue()) || {groups: []}; } catch(e) {}
-  const idx = existing.groups.findIndex(g => g.name === data.groupName);
-  const gd = {name:data.groupName,emoji:data.groupEmoji||'👥',currency:cur,members:data.members||[],expenses:data.expenses||[]};
-  if (idx >= 0) existing.groups[idx] = gd; else existing.groups.push(gd);
+  // Find by id first, then by name (handles same-named groups created with different local ids)
+  const idIdx = data.groupId
+    ? existing.groups.findIndex(g => g.id === data.groupId)
+    : -1;
+  const nameIdx = idIdx < 0
+    ? existing.groups.findIndex(g => g.name === data.groupName)
+    : -1;
+  const canonicalId = idIdx >= 0
+    ? existing.groups[idIdx].id
+    : nameIdx >= 0
+      ? existing.groups[nameIdx].id
+      : (data.groupId || data.groupName);
+  const gd = {
+    id: canonicalId,
+    name: data.groupName,
+    emoji: data.groupEmoji || '👥',
+    currency: cur,
+    members: data.members || [],
+    expenses: data.expenses || []
+  };
+  const finalIdx = idIdx >= 0 ? idIdx : nameIdx;
+  if (finalIdx >= 0) existing.groups[finalIdx] = gd; else existing.groups.push(gd);
   meta.getRange(1,1).setValue(JSON.stringify(existing));
 
   // Expenses tab — one per group

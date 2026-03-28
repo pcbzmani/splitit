@@ -42,19 +42,28 @@ function writeToSheet(data) {
   if (!meta) { meta = ss.insertSheet('_meta'); meta.hideSheet(); }
   let existing = {groups: []};
   try { existing = JSON.parse(meta.getRange(1,1).getValue()) || {groups: []}; } catch(e) {}
-  // Match by id (preferred) or fall back to name for backwards compat
-  const idx = data.groupId
+  // Find by id first, then by name (handles same-named groups created with different local ids)
+  const idIdx = data.groupId
     ? existing.groups.findIndex(g => g.id === data.groupId)
-    : existing.groups.findIndex(g => g.name === data.groupName);
+    : -1;
+  const nameIdx = idIdx < 0
+    ? existing.groups.findIndex(g => g.name === data.groupName)
+    : -1;
+  const canonicalId = idIdx >= 0
+    ? existing.groups[idIdx].id          // exact id match — keep it
+    : nameIdx >= 0
+      ? existing.groups[nameIdx].id      // name match — preserve canonical id, don't adopt new id
+      : (data.groupId || data.groupName); // new group — use provided id
   const gd = {
-    id: data.groupId || data.groupName,
+    id: canonicalId,
     name: data.groupName,
     emoji: data.groupEmoji || '👥',
     currency: cur,
     members: data.members || [],
     expenses: data.expenses || []
   };
-  if (idx >= 0) existing.groups[idx] = gd; else existing.groups.push(gd);
+  const finalIdx = idIdx >= 0 ? idIdx : nameIdx;
+  if (finalIdx >= 0) existing.groups[finalIdx] = gd; else existing.groups.push(gd);
   meta.getRange(1,1).setValue(JSON.stringify(existing));
 
   // Expenses tab — one per group
