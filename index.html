@@ -1340,27 +1340,55 @@ async function pullFromSheet(sh,silent){
 
 // Sync a specific group to a specific sheet.
 // Uses POST so payload size is unlimited (no URL-length constraint).
-// Content-Type: text/plain avoids a CORS preflight on no-cors requests.
+// Content-Type: text/plain is a CORS-safelisted value — no preflight, works in no-cors mode.
 function syncGroupToSheet(sh,g){
   if(!sh||!sh.sheetUrl||!g)return;
-  try{
-    fetch(sh.sheetUrl,{
-      method:'POST',
-      mode:'no-cors',
-      body:JSON.stringify({
-        groupId:g.id,groupName:g.name,groupEmoji:g.emoji,currency:g.currency,
-        expenses:g.expenses,members:g.members
-      })
-    }).catch(()=>{});
-  }catch(e){}
+  return fetch(sh.sheetUrl,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({
+      groupId:g.id,groupName:g.name,groupEmoji:g.emoji,currency:g.currency,
+      expenses:g.expenses,members:g.members
+    })
+  }).catch(()=>{});
 }
 
-function syncToSheet(){
+async function syncToSheet(){
   const sh=GS();if(!sh||!sh.sheetUrl)return;
   const g=G();if(!g)return;
-  syncGroupToSheet(sh,g);
-  document.getElementById('sheetStatus').textContent='✓ Synced';
-  setTimeout(()=>document.getElementById('sheetStatus').textContent='Sheet Connected',2000);
+  const el=document.getElementById('sheetStatus');
+  el.textContent='⟳ Syncing…';
+  try{
+    await syncGroupToSheet(sh,g);
+    // Verify: a quick read-back check to confirm the sheet received the write.
+    // Uses a short timeout so UI doesn't block.
+    setTimeout(async()=>{
+      try{
+        const res=await fetch(sh.sheetUrl+'?action=read',{signal:AbortSignal.timeout(6000)});
+        const data=await res.json();
+        const remoteG=(data.groups||[]).find(rg=>rg.id===g.id||rg.name===g.name);
+        const remoteCount=remoteG?(remoteG.expenses||[]).length:null;
+        if(remoteCount===null){
+          el.textContent='⚠ Sheet not found';
+          toast('⚠ Sheet sync failed — is the Apps Script redeployed?');
+        } else if(remoteCount!==g.expenses.length){
+          el.textContent='⚠ Sync mismatch';
+          toast('⚠ Sheet data mismatch — redeploy Apps Script as New Deployment');
+        } else {
+          el.textContent='✓ Synced';
+          setTimeout(()=>el.textContent='Sheet Connected',2000);
+        }
+      }catch(_){
+        // Read failed — don't alarm user, write may still have worked
+        el.textContent='✓ Synced';
+        setTimeout(()=>el.textContent='Sheet Connected',2000);
+      }
+    },1500);
+  }catch(err){
+    el.textContent='⚠ Sync failed';
+    toast('⚠ Could not reach sheet — check URL and script deployment');
+  }
 }
 
 // ══════════════════════════════════════
