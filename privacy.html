@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — SplitIt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14;
+      --surface: #161a23;
+      --border: #28303f;
+      --accent: #34d399;
+      --accent2: #3b82f6;
+      --text: #f0f4ff;
+      --muted: #6470878f;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      line-height: 1.75;
+      padding: 48px 16px 80px;
+    }
+    .wrap { max-width: 680px; margin: 0 auto; }
+    .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.8rem; margin-bottom: 4px; }
+    .brand span { color: var(--accent); }
+    .brand-back { font-size: 0.85rem; color: var(--accent2); text-decoration: none; display: inline-block; margin-bottom: 32px; }
+    .brand-back:hover { text-decoration: underline; }
+    h1 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+    .updated { color: #6470878f; font-size: 0.82rem; margin-bottom: 40px; }
+    h2 { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 32px 0 8px; color: var(--accent); }
+    p { margin-bottom: 12px; color: #c8d0e0; }
+    a { color: var(--accent2); }
+    a:hover { text-decoration: underline; }
+    code {
+      background: #1a1f2e;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.88em;
+      font-family: monospace;
+      color: var(--accent);
+    }
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 8px;
+    }
+    .tl-dr {
+      background: #0f2a1c;
+      border: 1px solid #1a4a2e;
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 36px;
+    }
+    .tl-dr p { color: var(--text); margin: 0; }
+    .tl-dr strong { color: var(--accent); }
+    footer { margin-top: 60px; text-align: center; color: #6470878f; font-size: 0.8rem; }
+    footer a { color: #6470878f; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Split<span>It</span></div>
+    <a class="brand-back" href="/splitit/">← Back to App</a>
+
+    <h1>Privacy Policy</h1>
+    <div class="updated">Last updated: April 2, 2026</div>
+
+    <div class="tl-dr">
+      <p><strong>TL;DR —</strong> SplitIt stores all your data locally on your device. We collect nothing. We have no servers. The only optional data transfer is to <strong>your own</strong> Google Sheet, which you set up and control.</p>
+    </div>
+
+    <div class="card">
+      <h2>1. Overview</h2>
+      <p>SplitIt ("the app") is a free, open-source group expense tracker built by pcbzmani. We are committed to protecting your privacy. This policy explains what data is collected, where it is stored, and how it is used.</p>
+    </div>
+
+    <div class="card">
+      <h2>2. Data We Collect</h2>
+      <p>SplitIt does <strong>not</strong> collect, transmit, or store any personal data on our servers. There are no user accounts, no analytics trackers, and no telemetry of any kind built into the app.</p>
+      <p>All data you enter — group names, member names, and expense details — is stored <strong>locally on your device</strong> using your browser's <code>localStorage</code> under the key <code>splitit_v3</code>. This data never leaves your device unless you explicitly enable Google Sheets sync (see section 3).</p>
+    </div>
+
+    <div class="card">
+      <h2>3. Google Sheets Sync (Optional)</h2>
+      <p>SplitIt includes an optional feature to sync your expense data with a Google Sheet. This feature is entirely opt-in and requires you to:</p>
+      <p>• Create your own Google Sheet<br>
+         • Deploy a Google Apps Script Web App from your own Google account<br>
+         • Paste the resulting URL into the app's Sheet Settings</p>
+      <p>When enabled, expense data is sent directly from your device to <strong>your own</strong> Google Sheet. We have no access to your Google account, your sheet data, or the Apps Script Web App URL at any time.</p>
+      <p>Google's own privacy practices govern any data stored in Google Sheets. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
+    </div>
+
+    <div class="card">
+      <h2>4. Third-Party Services</h2>
+      <p>SplitIt loads two fonts from <strong>Google Fonts</strong> (Syne and DM Sans). As part of this request, Google may log your IP address and browser user agent. No cookies are set by Google Fonts. No other third-party services, SDKs, or analytics tools are used.</p>
+    </div>
+
+    <div class="card">
+      <h2>5. Permissions</h2>
+      <p>The Android app (Trusted Web Activity) requests no special device permissions — no camera, microphone, contacts, location, or storage access is required or requested.</p>
+    </div>
+
+    <div class="card">
+      <h2>6. Data Deletion</h2>
+      <p>To delete all SplitIt data from your device:</p>
+      <p>• <strong>Browser:</strong> Open DevTools → Application → Local Storage → delete the <code>splitit_v3</code> key, or clear all site data for the app's domain.<br>
+         • <strong>Android app:</strong> Go to Settings → Apps → SplitIt → Clear Data, or uninstall the app. Uninstalling removes all locally stored data.</p>
+      <p>If you used Google Sheets sync, your data in Google Sheets must be deleted separately from within Google Sheets.</p>
+    </div>
+
+    <div class="card">
+      <h2>7. Children's Privacy</h2>
+      <p>SplitIt does not knowingly collect personal information from children under 13 (or under 16 in the EU). The app does not collect any personal information from any user of any age.</p>
+    </div>
+
+    <div class="card">
+      <h2>8. Changes to This Policy</h2>
+      <p>If this Privacy Policy is updated, the new version will be published at this URL with a revised "Last updated" date. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+    </div>
+
+    <div class="card">
+      <h2>9. Contact</h2>
+      <p>For privacy-related questions or concerns, please contact:</p>
+      <p><strong>Email:</strong> <a href="mailto:pcbzmani@gmail.com">pcbzmani@gmail.com</a></p>
+    </div>
+
+    <hr>
+    <footer>
+      <p>SplitIt · <a href="/splitit/">splitit app</a> · <a href="https://github.com/pcbzmani/splitit" target="_blank" rel="noopener">GitHub</a></p>
+    </footer>
+  </div>
+</body>
+</html>
