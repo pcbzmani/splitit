@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.pcbzmani.splitit",
+    "sha256_cert_fingerprints": [
+      "29:44:E2:28:5D:81:E2:D6:AF:D1:D4:14:A6:98:A1:2B:B4:F9:50:36:AF:DD:F8:83:87:37:27:24:30:7E:D1:53"
+    ]
+  }
+}]

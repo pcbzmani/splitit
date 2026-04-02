@@ -1288,6 +1288,19 @@ function remoteGroupsToLocal(remoteGroups){
   }));
 }
 
+// Merge remote expenses into local: remote wins for matching ids, local-only
+// expenses (pending sync) are preserved so a background pull can't overwrite
+// an expense that was just added but hasn't reached the sheet yet.
+function mergeExpenses(localExps,remoteExps){
+  const remoteMap=new Map((remoteExps||[]).map(e=>[e.id,e]));
+  const localMap=new Map((localExps||[]).map(e=>[e.id,e]));
+  // All remote expenses (authoritative for shared edits/deletes from others)
+  // plus any local expenses not yet acknowledged by the sheet
+  const merged=[...(remoteExps||[])];
+  (localExps||[]).forEach(e=>{if(!remoteMap.has(e.id))merged.push(e);});
+  return merged.sort((a,b)=>b.id-a.id);
+}
+
 async function pullFromSheet(sh,silent){
   if(!sh||!sh.sheetUrl)return;
   try{
@@ -1302,7 +1315,7 @@ async function pullFromSheet(sh,silent){
       if(!rg.id)return;
       const localIdx=sh.groups.findIndex(lg=>lg.id===rg.id);
       if(localIdx>=0){
-        sh.groups[localIdx].expenses=rg.expenses||[];
+        sh.groups[localIdx].expenses=mergeExpenses(sh.groups[localIdx].expenses,rg.expenses);
         sh.groups[localIdx].members=rg.members||sh.groups[localIdx].members;
         matchedLocalIdxs.add(localIdx);
         updated++;
@@ -1319,7 +1332,7 @@ async function pullFromSheet(sh,silent){
         added++;
       } else {
         const oldId=sh.groups[localIdx].id;
-        sh.groups[localIdx].expenses=rg.expenses||[];
+        sh.groups[localIdx].expenses=mergeExpenses(sh.groups[localIdx].expenses,rg.expenses);
         sh.groups[localIdx].members=rg.members||sh.groups[localIdx].members;
         // Adopt canonical remote id so future syncs use the same id and _meta stays clean
         if(rg.id&&oldId!==rg.id){
@@ -1332,6 +1345,10 @@ async function pullFromSheet(sh,silent){
     });
 
     persist();renderGroups();
+    // If the user is currently viewing a group (appScreen active), refresh it too
+    if(document.getElementById('appScreen').classList.contains('active')&&G()){
+      renderExpenses();renderBalances();updateSummary();
+    }
     if(!silent) toast(added?`↻ ${added} new group${added!==1?'s':''} pulled`:'↻ Groups up to date');
   }catch(e){
     if(!silent) toast('Could not pull from sheet. Check connection.');
