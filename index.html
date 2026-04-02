@@ -220,6 +220,9 @@ select option{background:var(--surface2);}
       <button class="new-group-btn" onclick="openCreateSheet()">＋ New Sheet</button>
       <button class="new-group-btn connect" onclick="openConnectSheet()">🔗 Connect Shared Sheet</button>
     </div>
+    <div style="text-align:center;margin-top:32px;padding-bottom:8px">
+      <button onclick="openModal('privacyModal')" style="background:none;border:none;color:var(--muted);font-size:0.78rem;cursor:pointer;text-decoration:underline;font-family:inherit">Privacy Policy</button>
+    </div>
   </div>
 </div>
 
@@ -521,6 +524,45 @@ select option{background:var(--surface2);}
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('sheetModal')">Close</button>
       <button class="btn btn-primary" onclick="copyScript()">📋 Copy Script</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: Privacy Policy ═══════════ -->
+<div class="modal-overlay" id="privacyModal">
+  <div class="modal" style="max-height:80vh;overflow-y:auto">
+    <div class="modal-title">🔒 Privacy Policy</div>
+    <div class="modal-desc" style="font-size:0.82rem;line-height:1.7;color:var(--text)">
+      <p style="color:var(--muted);margin-bottom:12px">Last updated: April 2, 2026</p>
+
+      <b>1. Overview</b>
+      <p>SplitIt is a free, open-source group expense tracker. We are committed to protecting your privacy. This policy explains what data we collect, how it is stored, and how it is used.</p>
+
+      <b>2. Data We Collect</b>
+      <p>SplitIt does <b>not</b> collect, transmit, or store any personal data on our servers. There are no user accounts, no analytics, and no tracking of any kind.</p>
+      <p>All data you enter (group names, member names, expenses) is stored <b>locally on your device</b> using your browser's <code style="background:var(--surface2);padding:1px 5px;border-radius:4px">localStorage</code>. This data never leaves your device unless you explicitly enable Google Sheets sync.</p>
+
+      <b>3. Google Sheets Sync (Optional)</b>
+      <p>If you choose to connect a Google Sheet, your expense data is sent directly to <b>your own</b> Google Sheet via a Google Apps Script Web App that you deploy yourself. We have no access to your Google account or your sheet data at any time.</p>
+      <p>Google's own privacy policy governs any data stored in Google Sheets. See <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--accent2)">policies.google.com/privacy</a>.</p>
+
+      <b>4. Third-Party Services</b>
+      <p>SplitIt loads fonts from <b>Google Fonts</b> (Syne and DM Sans). Google may log your IP address as part of this request. No other third-party services are used.</p>
+
+      <b>5. Data Deletion</b>
+      <p>To delete all app data, clear your browser's site data for this app, or use your browser's developer tools to remove the <code style="background:var(--surface2);padding:1px 5px;border-radius:4px">splitit_v3</code> key from localStorage. Uninstalling the app removes all local data.</p>
+
+      <b>6. Children's Privacy</b>
+      <p>SplitIt does not knowingly collect data from children under 13. The app does not collect any personal information from any user.</p>
+
+      <b>7. Changes to This Policy</b>
+      <p>If this policy is updated, the revised version will be published within the app. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+
+      <b>8. Contact</b>
+      <p>For privacy questions, contact us at: <span style="color:var(--accent2)">pcbzmani@gmail.com</span></p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeModal('privacyModal')">Close</button>
     </div>
   </div>
 </div>
